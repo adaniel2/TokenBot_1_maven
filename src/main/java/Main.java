@@ -8,8 +8,7 @@ import javax.security.auth.login.LoginException;
 public class Main {
     public static void main(String[] args) throws LoginException {
         // bot info
-        //JDABuilder builder = JDABuilder.createDefault(System.getenv("TOKEN"));
-        JDABuilder builder = JDABuilder.createDefault("NzcxODQwNDgxOTE0NjUwNjU2.X5x-dg.3tPvhpWoL9_q2GeAMKgsXjVPNd8");
+        JDABuilder builder = JDABuilder.createDefault(System.getenv("TOKEN"));
 
         // to-do: implement differently to allow mod to input these values using commands
         // CommentWatcher class should only work once these values are set "correctly"
