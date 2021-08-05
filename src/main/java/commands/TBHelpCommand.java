@@ -43,7 +43,7 @@ public class TBHelpCommand extends ListenerAdapter {
             eb.setTitle("TokenBot");
             eb.setColor(new Color(255,178,113));
 
-            String msg = "\nHi, i'm TokenBot and I was built to help manage submissions on this server " +
+            String msg = "\nHi, i'm TokenBot and I was built to help manage comment submissions on this server " +
                     "^_^\n\n" +
                         "To learn how to submit, check out the <#" + infoChId + "> channel for full instructions.\n\n" +
                             "I also provide some commands `]commands` that you may use, check them out!";

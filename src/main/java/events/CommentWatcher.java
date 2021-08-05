@@ -182,8 +182,6 @@ public class CommentWatcher extends ListenerAdapter {
     /**
      * Check if user has a token.
      *
-     * Note: This is only called when event occurs in submission channel.
-     *
      * @param e     event caused by user
      * @return      whether the user has a token
      */
@@ -202,18 +200,25 @@ public class CommentWatcher extends ListenerAdapter {
     }
 
     /**
-     * Remove the user's token.
+     * Remove one of the user's PBToken.
      *
-     * Note: This will currently remove all tokens if there's more than 1.
+     * Note: This removes the first PBToken the method finds. Would like to figure out how to remove specific
+     *       tokens later on...
      *
      * @param e     event containing user
      */
     private void removeToken(GuildMessageReceivedEvent e) {
+        // flag to prevent multiple token deletion
+        boolean removed = false;
+
         // cycle through roles to find token
         for (int i = 0; i < Objects.requireNonNull(e.getMember()).getRoles().size(); i++) {
-            if (e.getMember().getRoles().get(i).getName().contains("PBToken")) {
+            if (e.getMember().getRoles().get(i).getName().contains("PBToken") && !removed) {
                 // remove role from user
                 e.getGuild().removeRoleFromMember(e.getMember(), e.getMember().getRoles().get(i)).queue();
+
+                // set flag
+                removed = true;
             }
         }
     }
