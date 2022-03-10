@@ -51,6 +51,9 @@ public class TBLevelCommand extends ListenerAdapter {
             // set no token flag
             boolean noTokens = true;
 
+            // track number of tokens found
+            int count = 0;
+
             // cycle through roles
             for (int i = 0; i < Objects.requireNonNull(e.getMember()).getRoles().size(); i++) {
                 // has roles
@@ -61,13 +64,22 @@ public class TBLevelCommand extends ListenerAdapter {
                     // has a token
                     noTokens = false;
 
+                    // first token no comma
+                    if (count > 0) {
+                        reply.append(", ");
+                    }
+
                     // cycle through token id array
                     for (int j = 0; j < tokens.length; j++) {
                         // cross-reference caller's token ID with tokens array to determine token's level
                         if (tokens[j].equals(e.getMember().getRoles().get(i).getId())) {
                             // append each token to reply
-                            reply.append(((j+1) * (5)) + ", ");
+                            reply.append(((j+1) * (5)));
+
+                            // increase count
+                            count++;
                         }
+
                     }
 
                 }
@@ -83,8 +95,10 @@ public class TBLevelCommand extends ListenerAdapter {
                 e.getChannel().sendMessage("<@" + e.getAuthor().getId() + ">, you have no tokens.").queue();
             }
             else {
+                // format fixes for reply
+                reply.append(" token.");
+
                 // reply with list of token levels
-                reply.append("token.");
                 e.getChannel().sendMessage(reply.toString()).queue();
             }
 
