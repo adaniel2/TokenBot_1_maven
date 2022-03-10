@@ -17,7 +17,7 @@ import java.awt.*;
  */
 public class TBHelpCommand extends ListenerAdapter {
     // variables & constants
-    String infoChId;
+    private final String infoChId;
 
     /**
      * Constructor for the server's info channel ID.

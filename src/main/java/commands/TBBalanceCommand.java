@@ -1,5 +1,6 @@
 package commands;
 
+import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -10,12 +11,22 @@ import java.util.Objects;
  * This is the balance command. It will return the number of token(s) a user currently has
  * and associated level.
  *
- * Note: Token name is currently hardcoded.
- *
  * @author      Daniel Almeida
- * @version     11/2/20
+ * @version     10/3/22
  */
 public class TBBalanceCommand extends ListenerAdapter {
+    // variables & constants
+    private final String tokenName; // token name
+
+    /**
+     * Constructor for TBBalanceCommand initializes variables.
+     *
+     * @param tName        Name of token used in server
+     */
+    public TBBalanceCommand(String tName) {
+        tokenName = tName;
+    }
+
     /**
      * Watch guild messages for the "balance" command and reply with user's token balance.
      *
@@ -32,7 +43,7 @@ public class TBBalanceCommand extends ListenerAdapter {
             int nTokens = 0;
 
             for (int i = 0; i < Objects.requireNonNull(e.getMember()).getRoles().size(); i++) {
-                if (e.getMember().getRoles().get(i).getName().contains("PBToken")) {
+                if (e.getMember().getRoles().get(i).getName().contains(tokenName)) {
                     // increase count
                     nTokens++;
                 }

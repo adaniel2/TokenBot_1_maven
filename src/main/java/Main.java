@@ -17,17 +17,17 @@ public class Main {
         // let users pick which token they want to use by specifying level
 
         // server specific inputs
-        String targetChannelID = "772607955538804759";
+        String targetChannelID = "772607955538804759"; // 772607955538804759 is pbtoken channel
 
-        String curatorID = "183588631569498112";
+        String curatorID = "183588631569498112"; // 183588631569498112 is me on discord
 
         // this token ID array must increase in level (from left to right)
         String[] tokens = new String[] {"772603050329899071", "772603979716362290",
                 "772604642882093096", "772605656636063745"};
 
-        String helpChannelID = "770745831728742464";
+        String helpChannelID = "770745831728742464"; // 770745831728742464 is pbtoken info channel
 
-        // String tokenName = "PBToken";
+        String tokenName = "PBToken";
 
         // int chLimit = 10;
 
@@ -39,7 +39,7 @@ public class Main {
         CommentWatcher comments = new CommentWatcher(curatorID, targetChannelID, 0, true, waiter);
 
         // commands
-        TBBalanceCommand tbBalanceCommand = new TBBalanceCommand();
+        TBBalanceCommand tbBalanceCommand = new TBBalanceCommand(tokenName);
         TBCommandsCommand tbCommandsCommand = new TBCommandsCommand();
         TBHelpCommand tbHelpCommand = new TBHelpCommand(helpChannelID);
         TBLevelCommand tbLevelCommand = new TBLevelCommand(tokens);
