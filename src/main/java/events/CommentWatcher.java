@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * by the purposes of the bot.
  *
  * @author      Daniel Almeida
- * @version     10/3/22
+ * @version     3/10/22
  */
 public class CommentWatcher extends ListenerAdapter {
     // variables & constants

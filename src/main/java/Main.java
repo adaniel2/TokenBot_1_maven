@@ -42,7 +42,7 @@ public class Main {
         TBBalanceCommand tbBalanceCommand = new TBBalanceCommand(tokenName);
         TBCommandsCommand tbCommandsCommand = new TBCommandsCommand();
         TBHelpCommand tbHelpCommand = new TBHelpCommand(helpChannelID);
-        TBLevelCommand tbLevelCommand = new TBLevelCommand(tokens);
+        TBLevelCommand tbLevelCommand = new TBLevelCommand(tokenName, tokens);
         TBSlotsCommand tbSlotsCommand = new TBSlotsCommand(targetChannelID);
 
         // add event listeners and build

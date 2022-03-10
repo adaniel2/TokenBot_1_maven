@@ -11,21 +11,22 @@ import java.util.Objects;
  *
  * Note: It will return the level for all tokens the user has.
  *
- * Note: Token name is currently hardcoded.
- *
  * @author      Daniel Almeida
- * @version     11/3/20
+ * @version     3/10/22
  */
 public class TBLevelCommand extends ListenerAdapter {
     // variables & constants
+    private final String tokenName;
     private final String[] tokens;
 
     /**
      * Constructor to initialize an array of server specific token IDs
      *
+     * @param tn    token name
      * @param t     token ID array
      */
-    public TBLevelCommand(String[] t) {
+    public TBLevelCommand(String tn, String[] t) {
+        tokenName = tn;
         tokens = t;
     }
 
@@ -53,7 +54,7 @@ public class TBLevelCommand extends ListenerAdapter {
                 noRoles = false;
 
                 // check the role is a token
-                if (e.getMember().getRoles().get(i).getName().contains("PBToken")) {
+                if (e.getMember().getRoles().get(i).getName().contains(tokenName)) {
                     // has a token
                     noTokens = false;
 

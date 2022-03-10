@@ -12,7 +12,7 @@ import java.util.Objects;
  * and associated level.
  *
  * @author      Daniel Almeida
- * @version     10/3/22
+ * @version     3/10/22
  */
 public class TBBalanceCommand extends ListenerAdapter {
     // variables & constants
