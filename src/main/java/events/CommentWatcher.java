@@ -19,13 +19,12 @@ import java.util.concurrent.TimeUnit;
  * sent into a submission channel and responding with an appropriate action as defined
  * by the purposes of the bot.
  *
- * Note: Token name is currently hardcoded.
- *
  * @author      Daniel Almeida
- * @version     10/31/20
+ * @version     10/3/22
  */
 public class CommentWatcher extends ListenerAdapter {
     // variables & constants
+    private final String tokenName; // token name
     private final String chId; // comment channel id (submission channel)
     private final int INFO_COUNT; // if there's any info messages in the channel, define that number here
     private final boolean godMode; // allows posting without token (can be enabled for maintenance purposes)
@@ -35,13 +34,15 @@ public class CommentWatcher extends ListenerAdapter {
     /**
      * Constructor for CommentWatcher initializes variables.
      *
+     * @param tn        token name
      * @param cu        curator's ID
      * @param ch        submission channel ID
      * @param IC        no. of permanent info/instruction messages in channel
      * @param gm        decide whether no-token posts are deleted or not
      * @param w         event waiter
      */
-    public CommentWatcher(String cu, String ch, int IC, boolean gm, EventWaiter w) {
+    public CommentWatcher(String tn, String cu, String ch, int IC, boolean gm, EventWaiter w) {
+        tokenName = tn;
         curatorID = cu;
         chId = ch;
         waiter = w;
@@ -190,7 +191,7 @@ public class CommentWatcher extends ListenerAdapter {
 
         // find role
         for (int i = 0; i < Objects.requireNonNull(e.getMember()).getRoles().size() && !tokenFlag; i++) {
-            if (e.getMember().getRoles().get(i).getName().contains("PBToken")) {
+            if (e.getMember().getRoles().get(i).getName().contains(tokenName)) {
                 // has a token
                 tokenFlag = true;
             }
@@ -200,9 +201,9 @@ public class CommentWatcher extends ListenerAdapter {
     }
 
     /**
-     * Remove one of the user's PBToken.
+     * Remove one of the user's token.
      *
-     * Note: This removes the first PBToken the method finds. Would like to figure out how to remove specific
+     * Note: This removes the first token the method finds. Would like to figure out how to remove specific
      *       tokens later on...
      *
      * @param e     event containing user
@@ -213,7 +214,7 @@ public class CommentWatcher extends ListenerAdapter {
 
         // cycle through roles to find token
         for (int i = 0; i < Objects.requireNonNull(e.getMember()).getRoles().size(); i++) {
-            if (e.getMember().getRoles().get(i).getName().contains("PBToken") && !removed) {
+            if (e.getMember().getRoles().get(i).getName().contains(tokenName) && !removed) {
                 // remove role from user
                 e.getGuild().removeRoleFromMember(e.getMember(), e.getMember().getRoles().get(i)).queue();
 
