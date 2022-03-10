@@ -97,7 +97,7 @@ public class TBLevelCommand extends ListenerAdapter {
             else {
                 // format fixes for reply
                 if (count > 1) {
-                    reply.replace(reply.lastIndexOf(","), reply.lastIndexOf(",") + 1, " and ");
+                    reply.replace(reply.lastIndexOf(","), reply.lastIndexOf(",") + 1, " and");
                 }
                 reply.append(" token.");
 
