@@ -70,10 +70,6 @@ public class TBLevelCommand extends ListenerAdapter {
                         }
                     }
 
-                    // reply with list of token levels
-                    reply.append("token.");
-                    e.getChannel().sendMessage(reply.toString()).queue();
-
                 }
 
             }
@@ -86,8 +82,11 @@ public class TBLevelCommand extends ListenerAdapter {
             else if (noTokens) { // no tokens
                 e.getChannel().sendMessage("<@" + e.getAuthor().getId() + ">, you have no tokens.").queue();
             }
-
-
+            else {
+                // reply with list of token levels
+                reply.append("token.");
+                e.getChannel().sendMessage(reply.toString()).queue();
+            }
 
         }
 
