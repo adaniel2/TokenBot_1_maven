@@ -42,6 +42,9 @@ public class TBLevelCommand extends ListenerAdapter {
 
         // if it's the command, determine: what token(s) caller has, calculate token level(s) and reply
         if (message.equals("]level")) {
+            // string build
+            StringBuilder reply = new StringBuilder("<@" + e.getAuthor().getId() + ">, you have a level ");
+
             // set no roles flag
             boolean noRoles = true;
 
@@ -62,10 +65,15 @@ public class TBLevelCommand extends ListenerAdapter {
                     for (int j = 0; j < tokens.length; j++) {
                         // cross-reference caller's token ID with tokens array to determine token's level
                         if (tokens[j].equals(e.getMember().getRoles().get(i).getId())) {
-                            e.getChannel().sendMessage("<@" + e.getAuthor().getId() +
-                                    ">, you have a level " + ((j+1) * (5)) + " token.").queue();
+                            // append each token to reply
+                            reply.append(((j+1) * (5)) + ", ");
                         }
                     }
+
+                    // reply with list of token levels
+                    reply.append("token.");
+                    e.getChannel().sendMessage(reply.toString()).queue();
+
                 }
 
             }
@@ -78,6 +86,8 @@ public class TBLevelCommand extends ListenerAdapter {
             else if (noTokens) { // no tokens
                 e.getChannel().sendMessage("<@" + e.getAuthor().getId() + ">, you have no tokens.").queue();
             }
+
+
 
         }
 
