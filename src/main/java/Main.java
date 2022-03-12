@@ -23,7 +23,7 @@ public class Main {
 
         String curatorID = "183588631569498112"; // 183588631569498112 is me on discord
 
-        // this token ID array increases in level (from left to right)
+        // this token ID array MUST increase in level (from left to right)
         String[] tokens = new String[] {"772603050329899071", "772603979716362290",
                 "772604642882093096", "772605656636063745"};
 

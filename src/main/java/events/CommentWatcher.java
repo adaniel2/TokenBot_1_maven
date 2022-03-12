@@ -208,8 +208,7 @@ public class CommentWatcher extends ListenerAdapter {
     /**
      * Remove one of the user's token.
      *
-     * Note: This removes the first token the method finds. Would like to figure out how to remove specific
-     *       tokens later on...
+     * Note: This removes the first token the method finds.
      *
      * @param e     event containing user
      */
