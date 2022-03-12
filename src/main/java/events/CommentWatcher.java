@@ -160,7 +160,7 @@ public class CommentWatcher extends ListenerAdapter {
         Message m = e.getMessage();
 
         // return if format is proper
-        String regEx = "^(?:spotify:|(?:https?:\\/\\/(?:open|play)\\.spotify\\.com\\/))(?:embed)?\\/?(album|track)";
+        String regEx = "^(?:spotify:|(?:https?://(?:open|play)\\.spotify\\.com/))(?:embed)?/?(album|track)";
 
         Matcher match = Pattern.compile(regEx).matcher(m.getContentRaw());
 
@@ -269,7 +269,7 @@ public class CommentWatcher extends ListenerAdapter {
                                 case "y":
                                     // send author accepted message
                                     sendSecretMessage(commentAuthor, "<@" + commentAuthor.getId() + ">, " +
-                                            "your comment submission (" + mess.getContentRaw() + ") was accepted!",
+                                            "your track submission (" + mess.getContentRaw() + ") was accepted!",
                                             86400).queue();
 
                                     m.complete().delete().queue(); // delete link
@@ -277,7 +277,7 @@ public class CommentWatcher extends ListenerAdapter {
                                 case "n":
                                     // send author denied message
                                     sendSecretMessage(commentAuthor, "<@" + commentAuthor.getId() + ">, " +
-                                            "your comment submission (" + mess.getContentRaw() + ") was denied.",
+                                            "your track submission (" + mess.getContentRaw() + ") was denied.",
                                             86400).queue();
 
                                     m.complete().delete().queue(); // delete link
