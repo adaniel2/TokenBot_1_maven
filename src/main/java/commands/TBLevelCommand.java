@@ -12,7 +12,7 @@ import java.util.Objects;
  * Note: It will return the level for all tokens the user has.
  *
  * @author      Daniel Almeida
- * @version     3/10/22
+ * @version     3/12/22
  */
 public class TBLevelCommand extends ListenerAdapter {
     // variables & constants

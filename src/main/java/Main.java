@@ -27,16 +27,16 @@ public class Main {
         String[] tokens = new String[] {"772603050329899071", "772603979716362290",
                 "772604642882093096", "772605656636063745"};
 
-        String tokenName = "playlist token";
+        String tokenName = "playlist token"; // token name (must match discord role name)
 
-        // int chLimit = 10;
+        // int chLimit = 10; // submission limit
 
         // waiter
         EventWaiter waiter = new EventWaiter();
         builder.addEventListeners(waiter);
 
         // comments
-        CommentWatcher comments = new CommentWatcher(tokenName, curatorID, targetChannelID, 0, true, waiter);
+        CommentWatcher comments = new CommentWatcher(tokenName, curatorID, targetChannelID, 0, false, waiter);
 
         // commands
         TBBalanceCommand tbBalanceCommand = new TBBalanceCommand(tokenName);

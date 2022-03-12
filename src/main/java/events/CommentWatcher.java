@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  * by the purposes of the bot.
  *
  * @author      Daniel Almeida
- * @version     3/10/22
+ * @version     3/12/22
  */
 public class CommentWatcher extends ListenerAdapter {
     // variables & constants
@@ -94,12 +94,12 @@ public class CommentWatcher extends ListenerAdapter {
                         "check the #playlist-token-info channel for more information.", 300).queue();
             }
             else if (n + 1 > 10) { // count check
-                messageSent.delete().queue();
-                commentRemoved = true;
-
-                sendSecretMessage(user, "<@" + user.getId() + ">, " +
-                "I have deleted your submission <:man_detective:771957824476938271>. Please wait until a " +
-                    "slot is available. Current limit: " + 10, 300).queue();
+//                messageSent.delete().queue();
+//                commentRemoved = true;
+//
+//                sendSecretMessage(user, "<@" + user.getId() + ">, " +
+//                "I have deleted your submission <:man_detective:771957824476938271>. Please wait until a " +
+//                    "slot is available. Current limit: " + 10, 300).queue();
             }
 
             // remove token (if submission was successful)

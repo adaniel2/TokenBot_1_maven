@@ -13,7 +13,7 @@ import java.awt.*;
  * Provides some text to help caller get started with the bot.
  *
  * @author      Daniel Almeida
- * @version     11/4/20
+ * @version     3/12/22
  */
 public class TBHelpCommand extends ListenerAdapter {
     // variables & constants

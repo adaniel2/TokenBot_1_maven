@@ -8,10 +8,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * This is the slots command. It will return the target channel's available slots.
  *
- * Note: Currently, the channel's limit is hardcoded in here.
- *
  * @author      Daniel Almeida
- * @version     11/2/20
+ * @version     3/12/22
  */
 public class TBSlotsCommand extends ListenerAdapter {
     // variables or constants
