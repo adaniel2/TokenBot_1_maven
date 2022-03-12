@@ -11,7 +11,7 @@ import java.awt.*;
  * This is the commands command. Returns an embed of commands available.
  *
  * @author      Daniel Almeida
- * @version     11/4/20
+ * @version     3/12/22
  */
 public class TBCommandsCommand extends ListenerAdapter {
     // array of commands
