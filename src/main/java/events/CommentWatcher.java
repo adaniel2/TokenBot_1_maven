@@ -106,10 +106,10 @@ public class CommentWatcher extends ListenerAdapter {
             if (!commentRemoved) {
                 removeToken(event);
 
-                sendSecretMessage(user, "<@" + user.getId() + ">, " +
-                    "your submission (entry #: " + (n + 1) + ") was successful!\n\n" +
-                        "Once a decisions has been made, you will receive a message letting " +
-                            "you know if your submission was approved or denied ;)", 300).queue();
+//                sendSecretMessage(user, "<@" + user.getId() + ">, " +
+//                    "your submission (entry #: " + (n + 1) + ") was successful!\n\n" +
+//                        "Once a decisions has been made, you will receive a message letting " +
+//                            "you know if your submission was approved or denied ;)", 300).queue();
             }
 
         }
