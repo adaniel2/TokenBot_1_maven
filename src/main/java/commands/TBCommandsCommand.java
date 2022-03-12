@@ -19,7 +19,7 @@ public class TBCommandsCommand extends ListenerAdapter {
             {"]balance", "Token balance"},
             {"]commands", "List of commands"},
             {"]level", "Token levels"},
-            {"]slots", "Available submission slots"},
+            {"]slots (disabled)", "Available submission slots"},
             {"]help", "Help info"}};
 
     /**
