@@ -13,6 +13,8 @@ import net.dv8tion.jda.api.requests.RestAction;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is a CommentWatcher class. It is responsible for watching for comments
@@ -91,8 +93,8 @@ public class CommentWatcher extends ListenerAdapter {
                 messageSent.delete().queue();
                 commentRemoved = true;
 
-                sendSecretMessage(user, "Spotify track links only! Check the #playlist-token-info" +
-                        " channel for more information.", 300).queue();
+                sendSecretMessage(user, "Spotify links only! If a Spotify link still gives this error, " +
+                        "check the #playlist-token-info channel for more information.", 300).queue();
             }
             else if (n + 1 > 10) { // count check
                 messageSent.delete().queue();
@@ -158,9 +160,15 @@ public class CommentWatcher extends ListenerAdapter {
         Message m = e.getMessage();
 
         // return if format is proper
-        String regEx = "/^(spotify:|https://[a-z]+\\.spotify\\.com/)/";
+        String regEx = "^(?:spotify:|(?:https?:\\/\\/(?:open|play)\\.spotify\\.com\\/))(?:embed)?\\/?(album|track)";
 
-        return m.getContentRaw().matches(regEx) && m.getContentRaw().contains("track");
+        Matcher match = Pattern.compile(regEx).matcher(m.getContentRaw());
+
+        if (match.find()) {
+            return match.group(1).equals("track");
+        }
+
+        return false;
     }
 
     /**
