@@ -85,9 +85,6 @@ public class CommentWatcher extends ListenerAdapter {
             // set comment removal flag
             commentRemoved = false;
 
-            // remove embeds (commented out since I am doing it via the labels + don't know if I ever got it to work)
-            // messageSent.suppressEmbeds(true).queue();
-
             // delete message if the new number of messages is > 10 or not proper format
             if (!isLink(event)) { // format check
                 messageSent.delete().queue();

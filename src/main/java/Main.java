@@ -36,7 +36,7 @@ public class Main {
         builder.addEventListeners(waiter);
 
         // comments
-        CommentWatcher comments = new CommentWatcher(tokenName, curatorID, targetChannelID, 0, false, waiter);
+        CommentWatcher comments = new CommentWatcher(tokenName, curatorID, targetChannelID, 0, true, waiter);
 
         // commands
         TBBalanceCommand tbBalanceCommand = new TBBalanceCommand(tokenName);
