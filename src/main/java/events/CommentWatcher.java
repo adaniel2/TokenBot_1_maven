@@ -91,7 +91,7 @@ public class CommentWatcher extends ListenerAdapter {
                 messageSent.delete().queue();
                 commentRemoved = true;
 
-                sendSecretMessage(user, "YouTube comment links only! Check the #progress-bar-info" +
+                sendSecretMessage(user, "Spotify track links only! Check the #playlist-token-info" +
                         " channel for more information.", 300).queue();
             }
             else if (n + 1 > 10) { // count check

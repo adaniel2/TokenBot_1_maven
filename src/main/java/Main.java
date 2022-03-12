@@ -13,7 +13,7 @@ public class Main {
         // to-do: implement differently to allow mod to input these values using commands
         // CommentWatcher class should only work once these values are set "correctly"
 
-        // to-do: tokenLevel | YT link -> a format to help replacement
+        // to-do: tokenLevel | Spotify link -> a format to help replacement
         // let users pick which token they want to use by specifying level
 
         // server specific inputs
