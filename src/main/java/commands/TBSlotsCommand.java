@@ -41,7 +41,7 @@ public class TBSlotsCommand extends ListenerAdapter {
 
             // count number of messages
             assert channel != null;
-            // int numMsg = channel.getHistoryFromBeginning(200).complete().size();
+            // int numMsg = channel.getHistoryFromBeginning(100).complete().size();
 
             // reply
             // e.getChannel().sendMessage("There are " + (10 - numMsg) + " submission slots open!").queue();

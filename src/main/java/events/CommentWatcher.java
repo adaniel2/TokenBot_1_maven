@@ -142,8 +142,8 @@ public class CommentWatcher extends ListenerAdapter {
         // grab message
         Message msg = e.getMessage();
 
-        // return comment count (limit is 200) accounting for info messages
-        return ch.getHistoryBefore(msg.getId(), 200).complete().getRetrievedHistory().size() - INFO_COUNT;
+        // return comment count (limit is 100) accounting for info messages
+        return ch.getHistoryBefore(msg.getId(), 100).complete().getRetrievedHistory().size() - INFO_COUNT;
     }
 
     /**
