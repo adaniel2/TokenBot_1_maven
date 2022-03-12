@@ -18,7 +18,7 @@ public class TBCommandsCommand extends ListenerAdapter {
     private final String[][] commands = new String[][]{
             {"]balance", "Token balance"},
             {"]commands", "List of commands"},
-            {"]level", "Token levels"},
+            {"]level (disabled)", "Token levels"},
             {"]slots (disabled)", "Available submission slots"},
             {"]help", "Help info"}};
 

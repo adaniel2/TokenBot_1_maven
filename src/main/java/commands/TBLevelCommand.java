@@ -97,11 +97,11 @@ public class TBLevelCommand extends ListenerAdapter {
 
             // if caller has no roles (and don't report no tokens)
             if (noRoles) {
-                e.getChannel().sendMessage("<@" + e.getAuthor().getId() +
-                        ">, according to my calculations... you're not even a member o.O").queue();
+//                e.getChannel().sendMessage("<@" + e.getAuthor().getId() +
+//                        ">, according to my calculations... you're not even a member o.O").queue();
             }
             else if (noTokens) { // no tokens
-                e.getChannel().sendMessage("<@" + e.getAuthor().getId() + ">, you have no tokens.").queue();
+//                e.getChannel().sendMessage("<@" + e.getAuthor().getId() + ">, you have no tokens.").queue();
             }
             else {
                 // format fixes for reply
@@ -111,7 +111,7 @@ public class TBLevelCommand extends ListenerAdapter {
                 reply.append(" token.");
 
                 // reply with list of token levels
-                e.getChannel().sendMessage(reply.toString()).queue();
+                // e.getChannel().sendMessage(reply.toString()).queue();
             }
 
         }
