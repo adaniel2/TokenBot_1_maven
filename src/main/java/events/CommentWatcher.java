@@ -230,13 +230,13 @@ public class CommentWatcher extends ListenerAdapter {
     }
 
     /**
-     * A reaction by curator to a link in the submission channel will delete the link & send the author a direct
+     * A reaction by curator to a link in the submission channel will send the author a direct
      * message detailing the result of their submission (which is determined by a prompt sent to curator).
      *
      * Checkmark: Submission accepted.
      * Cross: Submission denied.
      *
-     * Note: Currently, any reaction by curator will delete the message.
+     * Note: Currently, any reaction by curator will trigger the decision process.
      * Note: If multiple submissions are sent to curator, replying 'y' or 'n' will apply to all submissions pending
      *       This is an 'issue' that I could work on improving later...
      *
