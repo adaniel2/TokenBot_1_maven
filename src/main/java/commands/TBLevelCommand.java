@@ -34,6 +34,9 @@ public class TBLevelCommand extends ListenerAdapter {
      * This function replies with the caller's token's level. It will also notify the caller
      * if he has no tokens available.
      *
+     * Note: Still cycling through the token array to find a matching ID. With the name solution,
+     *       this is not necessarily required, however perhaps having this check is safer.
+     *
      * @param e     guild message event
      */
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent e) {
@@ -59,8 +62,11 @@ public class TBLevelCommand extends ListenerAdapter {
                 // has roles
                 noRoles = false;
 
+                // role name
+                String roleName = e.getMember().getRoles().get(i).getName();
+
                 // check the role is a token
-                if (e.getMember().getRoles().get(i).getName().contains(tokenName)) {
+                if (roleName.contains(tokenName)) {
                     // has a token
                     noTokens = false;
 
@@ -73,8 +79,11 @@ public class TBLevelCommand extends ListenerAdapter {
                     for (int j = 0; j < tokens.length; j++) {
                         // cross-reference caller's token ID with tokens array to determine token's level
                         if (tokens[j].equals(e.getMember().getRoles().get(i).getId())) {
-                            // append each token to reply
-                            reply.append(((j+1) * (5)));
+                            // append token level to reply (math based solution & requires pre-ordered array)
+                            // reply.append(((j+1) * (5)));
+
+                            // this solution focuses on the token's name if it includes the level in it
+                            reply.append(roleName.replaceAll("[^0-9]", ""));
 
                             // increase count
                             count++;
