@@ -272,7 +272,7 @@ public class CommentWatcher extends ListenerAdapter {
                                             "your track submission (" + mess.getContentRaw() + ") was accepted!",
                                             86400).queue();
 
-                                    m.complete().delete().queue(); // delete link
+                                    // m.complete().delete().queue(); // delete link
                                     break;
                                 case "n":
                                     // send author denied message
@@ -280,7 +280,7 @@ public class CommentWatcher extends ListenerAdapter {
                                             "your track submission (" + mess.getContentRaw() + ") was denied.",
                                             86400).queue();
 
-                                    m.complete().delete().queue(); // delete link
+                                    // m.complete().delete().queue(); // delete link
                                     break;
                                 default: // this should never happen; throw exception
                                     throw new RuntimeException("Unreachable switch case occurrence.");
