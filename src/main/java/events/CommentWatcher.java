@@ -92,7 +92,7 @@ public class CommentWatcher extends ListenerAdapter {
                 commentRemoved = true;
 
                 sendSecretMessage(user, "YouTube comment links only! Check the #progress-bar-info" +
-                        " channel for more information.", 90).queue();
+                        " channel for more information.", 300).queue();
             }
             else if (n + 1 > 10) { // count check
                 messageSent.delete().queue();
@@ -100,7 +100,7 @@ public class CommentWatcher extends ListenerAdapter {
 
                 sendSecretMessage(user, "<@" + user.getId() + ">, " +
                 "I have deleted your submission <:man_detective:771957824476938271>. Please wait until a " +
-                    "slot is available. Current limit: " + 10, 90).queue();
+                    "slot is available. Current limit: " + 10, 300).queue();
             }
 
             // remove token (if submission was successful)
@@ -148,19 +148,19 @@ public class CommentWatcher extends ListenerAdapter {
     }
 
     /**
-     * Determine if the event's message is in the format of a YouTube comment link.
-     *
-     * Note: Weak test, is there anything online that can help?
+     * Determine if the event's message is in the format of a Spotify track link.
      *
      * @param e     event containing message
-     * @return      true if the message is a YouTube comment link
+     * @return      true if the message is a Spotify track link
      */
     private boolean isLink(GuildMessageReceivedEvent e) {
         // grab the message being checked
         Message m = e.getMessage();
 
-        // return if format is proper (possible to cheat this check but that's a wasted submission and their loss)
-        return m.getContentRaw().contains("https://www.youtube.com/watch?v=") && m.getContentRaw().contains("&lc=");
+        // return if format is proper
+        String regEx = "/^(spotify:|https://[a-z]+\\.spotify\\.com/)/";
+
+        return m.getContentRaw().matches(regEx) && m.getContentRaw().contains("track");
     }
 
     /**
