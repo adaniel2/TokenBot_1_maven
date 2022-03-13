@@ -83,7 +83,7 @@ public class TBLevelCommand extends ListenerAdapter {
                             // reply.append(((j+1) * (5)));
 
                             // this solution focuses on the token's name if it includes the level in it
-                            reply.append(roleName.replaceAll("[^0-9]", ""));
+                            // reply.append(roleName.replaceAll("[^0-9]", ""));
 
                             // increase count
                             count++;
