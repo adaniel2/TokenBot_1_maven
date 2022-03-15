@@ -253,7 +253,7 @@ public class CommentWatcher extends ListenerAdapter {
             // send decision prompt to curator (given 60 seconds to reply)
             event.getUser().openPrivateChannel()
                     .flatMap(channel -> {
-                        channel.sendMessage("Comment posted by: " + commentAuthor.getName())
+                        channel.sendMessage("Submission posted by: " + commentAuthor.getName())
                                 .delay(60, TimeUnit.SECONDS)
                                     .flatMap(Message::delete).queue();
 
