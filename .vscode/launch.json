@@ -17,7 +17,7 @@
             "mainClass": "Main",
             "projectName": "TokenBot_1_maven",
             "env": {
-                "TOKEN": "NzcxODQwNDgxOTE0NjUwNjU2.X5x-dg.Mog5GQncx2M8xhd6-WWAVnxkrZA"
+                "TOKEN": "NzcxODQwNDgxOTE0NjUwNjU2.X5x-dg.Mog5GQncx2M8xhd6-WWAVnxkrZA" // test
             }
         }
     ]
