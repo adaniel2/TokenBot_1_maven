@@ -29,7 +29,7 @@ public class Main {
 
         String tokenName = "playlist token"; // token name (must match discord role name)
 
-        // int chLimit = 10; // submission limit
+        // int chLimit = 10; // channel submission limit
 
         // waiter
         EventWaiter waiter = new EventWaiter();
