@@ -23,6 +23,8 @@ import javax.security.auth.login.LoginException;
 public class Main {
     public static void main(String[] args) throws LoginException {
         // bot
+        System.out.println(Utility.readFromDatabase("TOKEN"));
+        
         JDABuilder builder = JDABuilder.createDefault(Utility.readFromDatabase("TOKEN"));
         SpotifyAPI spotifyApi = SpotifyAPI.getInstance();
 
