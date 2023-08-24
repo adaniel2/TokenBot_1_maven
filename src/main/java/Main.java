@@ -34,7 +34,7 @@ public class Main {
             String code = req.queryParams("code");
 
             if (code != null && !code.isEmpty()) {
-                Utility.saveToFile("SPOTIFY_AUTH_CODE", code); // Store the one-time auth code
+                Utility.saveToDatabase(code, code);("SPOTIFY_AUTH_CODE", code); // Store the one-time auth code
 
                 latch.countDown();
 
@@ -45,18 +45,18 @@ public class Main {
         });
 
         // server specific inputs
-        String targetChannelID = Utility.readFromFile("TARGET_CHANNEL_ID");
-        String helpChannelID = Utility.readFromFile("HELP_CHANNEL_ID");
-        String curatorID = Utility.readFromFile("CURATOR_ID");
-        String tokenName = Utility.readFromFile("TOKEN_NAME");
-        String commandsChannelId = Utility.readFromFile("COMMANDS_CHANNEL_ID");
+        String targetChannelID = Utility.readFromDatabase("TARGET_CHANNEL_ID");
+        String helpChannelID = Utility.readFromDatabase("HELP_CHANNEL_ID");
+        String curatorID = Utility.readFromDatabase("CURATOR_ID");
+        String tokenName = Utility.readFromDatabase("TOKEN_NAME");
+        String commandsChannelId = Utility.readFromDatabase("COMMANDS_CHANNEL_ID");
 
         // this token ID array increases in level (from left to right)
         List<String> tokenList = new ArrayList<>();
         int i = 1;
 
         while (true) {
-            String token = Utility.readFromFile("TOKEN_LEVEL_" + i);
+            String token = Utility.readFromDatabase("TOKEN_LEVEL_" + i);
 
             if (token != null && !token.isEmpty()) {
                 tokenList.add(token);
@@ -92,7 +92,7 @@ public class Main {
 
         // init spotify app authentication
         jda.retrieveUserById(curatorID).queue(bonjr -> {
-            String initialAuthCode = Utility.readFromFile("SPOTIFY_AUTH_CODE");
+            String initialAuthCode = Utility.readFromDatabase("SPOTIFY_AUTH_CODE");
 
             if (initialAuthCode == null) {
                 spotifyApi.initiateAuthorization(bonjr); // Send the admin the auth link
@@ -102,7 +102,7 @@ public class Main {
                         System.out.println("Timeout while waiting for Spotify auth code. Please restart bot.");
                     } else {
                         // Read from file again in case it's changed after initiateAuthorization
-                        String newAuthCode = Utility.readFromFile("SPOTIFY_AUTH_CODE");
+                        String newAuthCode = Utility.readFromDatabase("SPOTIFY_AUTH_CODE");
 
                         if (newAuthCode != null) {
                             spotifyApi.setAuthorizationCode(newAuthCode);
