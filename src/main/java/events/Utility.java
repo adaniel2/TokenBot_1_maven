@@ -2,6 +2,11 @@ package events;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -11,7 +16,7 @@ import net.dv8tion.jda.api.requests.RestAction;
 
 public class Utility {
     private static final Properties properties = new Properties();
-    
+
     /**
      * Sends a direct message to the user. Delete after a given amount of time.
      *
@@ -49,6 +54,47 @@ public class Utility {
 
             return null;
         }
+    }
+
+    public static void saveToDatabase(String key, String value) {
+        String sql = "INSERT INTO your_table_name(key, value) VALUES(?, ?) ON CONFLICT (key) DO UPDATE SET value = ?";
+
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, key);
+            stmt.setString(2, value);
+            stmt.setString(3, value);
+
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static String readFromDatabase(String key) {
+        String sql = "SELECT value FROM your_table_name WHERE key = ?";
+
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, key);
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("value");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    private static Connection getConnection() throws SQLException {
+        String dbUrl = System.getenv("DATABASE_URL");
+
+        return DriverManager.getConnection(dbUrl);
     }
 
 }
