@@ -17,14 +17,16 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import javax.security.auth.login.LoginException;
 
 public class Main {
     public static void main(String[] args) throws LoginException {
         // bot
-        System.out.println(Utility.readFromDatabase("TOKEN"));
-        
+        final Logger LOGGER = Logger.getLogger(Main.class.getName());
+        LOGGER.info(Utility.readFromDatabase("TOKEN"));
+
         JDABuilder builder = JDABuilder.createDefault(Utility.readFromDatabase("TOKEN"));
         SpotifyAPI spotifyApi = SpotifyAPI.getInstance();
 
