@@ -34,7 +34,7 @@ public class Main {
             String code = req.queryParams("code");
 
             if (code != null && !code.isEmpty()) {
-                Utility.saveToDatabase(code, code);("SPOTIFY_AUTH_CODE", code); // Store the one-time auth code
+                Utility.saveToDatabase("SPOTIFY_AUTH_CODE", code); // Store the one-time auth code
 
                 latch.countDown();
 
