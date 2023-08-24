@@ -20,6 +20,5 @@
 
 ## User
 config.properties
-src/main/java/events/Utility.java
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode
