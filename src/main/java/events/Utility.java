@@ -73,7 +73,7 @@ public class Utility {
     }
 
     public static String readFromDatabase(String key) {
-        String sql = "SELECT value FROM your_table_name WHERE key = ?";
+        String sql = "SELECT value FROM config WHERE key = ?";
 
         try (Connection conn = getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -81,6 +81,7 @@ public class Utility {
             stmt.setString(1, key);
 
             ResultSet rs = stmt.executeQuery();
+            
             if (rs.next()) {
                 return rs.getString("value");
             }
