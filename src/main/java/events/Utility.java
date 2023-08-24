@@ -100,10 +100,27 @@ public class Utility {
     }
 
     private static String toJdbcUrl(String databaseUrl) {
-        if (databaseUrl == null) {
+        if (databaseUrl == null || !databaseUrl.startsWith("postgresql://")) {
             return null;
         }
-        return "jdbc:" + databaseUrl;
-    }    
+    
+        int protocolEnd = databaseUrl.indexOf("://");
+        int credentialsEnd = databaseUrl.lastIndexOf("@");
+        int portStart = databaseUrl.lastIndexOf(":");
+    
+        String credentials = databaseUrl.substring(protocolEnd + 3, credentialsEnd);
+        String[] splitCredentials = credentials.split(":");
+        
+        String user = splitCredentials[0];
+        String password = splitCredentials[1];
+    
+        String afterCredentials = databaseUrl.substring(credentialsEnd + 1);
+        String host = afterCredentials.substring(0, afterCredentials.indexOf(":"));
+        String portAndDatabase = afterCredentials.substring(afterCredentials.indexOf(":") + 1);
+    
+        String jdbcUrl = "jdbc:postgresql://" + host + ":" + portAndDatabase + "?user=" + user + "&password=" + password;
+        
+        return jdbcUrl;
+    }     
 
 }
