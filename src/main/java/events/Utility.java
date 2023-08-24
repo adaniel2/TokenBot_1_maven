@@ -57,7 +57,7 @@ public class Utility {
     }
 
     public static void saveToDatabase(String key, String value) {
-        String sql = "INSERT INTO your_table_name(key, value) VALUES(?, ?) ON CONFLICT (key) DO UPDATE SET value = ?";
+        String sql = "INSERT INTO config(key, value) VALUES(?, ?) ON CONFLICT (key) DO UPDATE SET value = ?";
 
         try (Connection conn = getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -93,9 +93,8 @@ public class Utility {
     }
 
     private static Connection getConnection() throws SQLException {
-        String dbUrl = System.getenv("DATABASE_URL");
-
-        System.out.println(dbUrl);
+        //String dbUrl = readFromFile("DATABASE_URL"); // local testing
+        String dbUrl = System.getenv("DATABASE_URL"); // live
 
         return DriverManager.getConnection(dbUrl);
     }
