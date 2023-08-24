@@ -12,41 +12,45 @@ import java.awt.*;
  *
  * Provides some text to help caller get started with the bot.
  *
- * @author      Daniel Almeida
- * @version     3/12/22
+ * @author Daniel Almeida
+ * @version 3/12/22
  */
 public class TBHelpCommand extends ListenerAdapter {
     // variables & constants
     private final String infoChId;
+    private final String commandsChId;
 
     /**
      * Constructor for the server's info channel ID.
      *
-     * @param ch        info channel ID
+     * @param ch info channel ID
      */
-    public TBHelpCommand(String ch) { infoChId = ch; }
+    public TBHelpCommand(String ch, String cmd_ch) {
+        infoChId = ch;
+        commandsChId = cmd_ch;
+    }
 
     /**
      * Reply with a help message providing caller with how-to information regarding
      * the bot's purpose and available functions.
      *
-     * @param e     guild message event
+     * @param e guild message event
      */
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent e) {
         // grab message
         String message = e.getMessage().getContentRaw();
 
-        if (message.equals("]help")) {
+        if (message.equals("]help") && e.getChannel().getId().equals(commandsChId)) {
             // embed builder
             EmbedBuilder eb = new EmbedBuilder();
 
             eb.setTitle("TokenBot");
-            eb.setColor(new Color(255,178,113));
+            eb.setColor(new Color(255, 178, 113));
 
-            String msg = "\nHi, i'm TokenBot and I was built to help manage comment submissions on this server " +
+            String msg = "\nHi, i'm TokenBot and I was built to help manage submissions on this server " +
                     "^_^\n\n" +
-                        "To learn how to submit, check out the <#" + infoChId + "> channel for full instructions.\n\n" +
-                            "I also provide some commands `]commands` that you may use, check them out!";
+                    "To learn how to submit, check out the <#" + infoChId + "> channel for full instructions.\n\n" +
+                    "I also provide some commands `]commands` that you may use, check them out!";
 
             eb.addField("`Version 1.0`", msg, true);
 
