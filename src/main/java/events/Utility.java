@@ -81,7 +81,7 @@ public class Utility {
             stmt.setString(1, key);
 
             ResultSet rs = stmt.executeQuery();
-            
+
             if (rs.next()) {
                 return rs.getString("value");
             }
@@ -93,7 +93,7 @@ public class Utility {
     }
 
     private static Connection getConnection() throws SQLException {
-        //String dbUrl = readFromFile("DATABASE_URL"); // local testing
+        // String dbUrl = toJdbcUrl(readFromFile("DATABASE_URL")); // local testing
         String dbUrl = toJdbcUrl(System.getenv("DATABASE_URL")); // live
 
         return DriverManager.getConnection(dbUrl);
@@ -103,24 +103,24 @@ public class Utility {
         if (databaseUrl == null || !databaseUrl.startsWith("postgresql://")) {
             return null;
         }
-    
+
         int protocolEnd = databaseUrl.indexOf("://");
         int credentialsEnd = databaseUrl.lastIndexOf("@");
-        int portStart = databaseUrl.lastIndexOf(":");
-    
+
         String credentials = databaseUrl.substring(protocolEnd + 3, credentialsEnd);
         String[] splitCredentials = credentials.split(":");
-        
+
         String user = splitCredentials[0];
         String password = splitCredentials[1];
-    
+
         String afterCredentials = databaseUrl.substring(credentialsEnd + 1);
         String host = afterCredentials.substring(0, afterCredentials.indexOf(":"));
         String portAndDatabase = afterCredentials.substring(afterCredentials.indexOf(":") + 1);
-    
-        String jdbcUrl = "jdbc:postgresql://" + host + ":" + portAndDatabase + "?user=" + user + "&password=" + password;
-        
+
+        String jdbcUrl = "jdbc:postgresql://" + host + ":" + portAndDatabase + "?user=" + user + "&password="
+                + password;
+
         return jdbcUrl;
-    }     
+    }
 
 }
