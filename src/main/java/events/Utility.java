@@ -93,6 +93,9 @@ public class Utility {
     }
 
     private static Connection getConnection() throws SQLException {
+        System.out.println(System.getenv("DATABASE_URL_ENV"));
+        System.out.println(System.getenv("DATABASE_URL"));
+        
         String dbUrl = toJdbcUrl(System.getenv("DATABASE_URL_ENV"));
 
         return DriverManager.getConnection(dbUrl);

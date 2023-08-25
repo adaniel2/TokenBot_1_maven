@@ -23,6 +23,9 @@ import javax.security.auth.login.LoginException;
 
 public class Main {
     public static void main(String[] args) throws LoginException {
+        System.out.println(System.getenv("DATABASE_URL_ENV"));
+        System.out.println(System.getenv("DATABASE_URL"));
+        
         // bot
         JDABuilder builder = JDABuilder.createDefault(Utility.readFromDatabase("TOKEN"));
         SpotifyAPI spotifyApi = SpotifyAPI.getInstance();
