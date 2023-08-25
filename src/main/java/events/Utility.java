@@ -14,8 +14,12 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.RestAction;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Utility {
     private static final Properties properties = new Properties();
+    private static final Logger logger = LoggerFactory.getLogger(Utility.class);
 
     /**
      * Sends a direct message to the user. Delete after a given amount of time.
