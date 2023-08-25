@@ -16,6 +16,12 @@ FROM openjdk:11-jre-slim
 
 WORKDIR /app
 
+# This ensures the DATABASE_URL can be injected during the build phase
+ARG DATABASE_URL
+
+# This sets the DATABASE_URL as an environment variable in the running container
+ENV DATABASE_URL=$DATABASE_URL
+
 # Copy the built JAR from the build stage
 COPY --from=build /app/target/TokenBot_1_maven-1.0-SNAPSHOT-jar-with-dependencies.jar /app/
 
