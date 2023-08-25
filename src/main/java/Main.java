@@ -20,11 +20,11 @@ import java.util.concurrent.TimeUnit;
 
 import javax.security.auth.login.LoginException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Main {
-    private static final Logger logger = LogManager.getLogger(Main.class);
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws LoginException {
         logger.info(System.getenv("DATABASE_URL_ENV"));
@@ -46,7 +46,7 @@ public class Main {
         } else {
             portNumber = 8080; // fallback to 8080 for local development
         }
-        
+
         port(portNumber);
 
         get("/spotify-redirect", (req, res) -> {
