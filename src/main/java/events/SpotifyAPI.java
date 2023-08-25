@@ -144,7 +144,9 @@ public class SpotifyAPI {
 
             long timeElapsed = (currentTimeInSeconds - authTime);
 
-            System.out.println("Time elapsed: " + timeElapsed);
+            if (timeElapsed <= expiresIn) {
+                System.out.println("Time since last authentication: " + timeElapsed);
+            }
 
             return timeElapsed > expiresIn;
         } catch (MissingTokenException e) { // refresh token will handle both expired and does not exist cases
@@ -179,6 +181,8 @@ public class SpotifyAPI {
 
             spotifyApi.setAccessToken(accessToken);
             spotifyApi.setRefreshToken(refreshToken);
+
+            System.out.println("Token refreshed.");
 
             return true;
         } catch (IOException | SpotifyWebApiException | ParseException e) {
