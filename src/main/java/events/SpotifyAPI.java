@@ -21,7 +21,7 @@ import se.michaelthelin.spotify.requests.data.tracks.GetTrackRequest;
 public class SpotifyAPI {
     private static SpotifyAPI instance;
     private SpotifyApi spotifyApi;
-    private static final URI redirectUri = SpotifyHttpManager.makeUri(Utility.readFromDatabase("URI_STRING"));
+    private static final URI redirectUri = SpotifyHttpManager.makeUri(Utility.readFromFile("URI_STRING"));
     private String authorizationCode;
     private AuthorizationCodeCredentials authorizationCodeCredentials;
     private String accessToken;
@@ -30,13 +30,13 @@ public class SpotifyAPI {
     // constructor
     private SpotifyAPI() {
         // on boot grab current tokens
-        accessToken = Utility.readFromDatabase("AUTH_ACCESS_TOKEN");
-        refreshToken = Utility.readFromDatabase("AUTH_REFRESH_TOKEN");
+        accessToken = Utility.readFromFile("AUTH_ACCESS_TOKEN");
+        refreshToken = Utility.readFromFile("AUTH_REFRESH_TOKEN");
 
         // authentication
         this.spotifyApi = new SpotifyApi.Builder()
-                .setClientId(Utility.readFromDatabase("APP_CLIENT_ID"))
-                .setClientSecret(Utility.readFromDatabase("CLIENT_SECRET"))
+                .setClientId(Utility.readFromFile("APP_CLIENT_ID"))
+                .setClientSecret(Utility.readFromFile("CLIENT_SECRET"))
                 .setRedirectUri(redirectUri)
                 .build();
 
@@ -70,7 +70,7 @@ public class SpotifyAPI {
 
             try {
                 String[] trackUri = new String[] { getTrack(trackId).getUri() };
-                String playlistId = Utility.readFromDatabase("PLAYLIST_ID");
+                String playlistId = Utility.readFromFile("PLAYLIST_ID");
 
                 AddItemsToPlaylistRequest addItemsToPlaylistRequest = spotifyApi
                         .addItemsToPlaylist(playlistId, trackUri)
@@ -117,10 +117,10 @@ public class SpotifyAPI {
             accessToken = authorizationCodeCredentials.getAccessToken();
             refreshToken = authorizationCodeCredentials.getRefreshToken();
 
-            Utility.saveToDatabase("AUTH_TIME", Long.toString(System.currentTimeMillis() / 1000));
-            Utility.saveToDatabase("AUTH_ACCESS_TOKEN", accessToken);
-            Utility.saveToDatabase("AUTH_REFRESH_TOKEN", refreshToken);
-            Utility.saveToDatabase("EXPIRES_IN", Integer.toString(expiresIn));
+            Utility.saveToFile("AUTH_TIME", Long.toString(System.currentTimeMillis() / 1000));
+            Utility.saveToFile("AUTH_ACCESS_TOKEN", accessToken);
+            Utility.saveToFile("AUTH_REFRESH_TOKEN", refreshToken);
+            Utility.saveToFile("EXPIRES_IN", Integer.toString(expiresIn));
 
             spotifyApi.setAccessToken(accessToken);
             spotifyApi.setRefreshToken(refreshToken);
@@ -138,8 +138,8 @@ public class SpotifyAPI {
                 throw new MissingTokenException("Access/Refresh token(s) missing.");
             }
 
-            long authTime = Long.parseLong(Utility.readFromDatabase("AUTH_TIME"));
-            int expiresIn = Integer.parseInt(Utility.readFromDatabase("EXPIRES_IN"));
+            long authTime = Long.parseLong(Utility.readFromFile("AUTH_TIME"));
+            int expiresIn = Integer.parseInt(Utility.readFromFile("EXPIRES_IN"));
             long currentTimeInSeconds = System.currentTimeMillis() / 1000;
 
             long timeElapsed = (currentTimeInSeconds - authTime);
@@ -158,8 +158,8 @@ public class SpotifyAPI {
     }
 
     public boolean refreshToken() {
-        String clientId = Utility.readFromDatabase("APP_CLIENT_ID");
-        String secret = Utility.readFromDatabase("CLIENT_SECRET");
+        String clientId = Utility.readFromFile("APP_CLIENT_ID");
+        String secret = Utility.readFromFile("CLIENT_SECRET");
 
         AuthorizationCodeRefreshRequest refreshRequest = spotifyApi
                 .authorizationCodeRefresh(clientId, secret, refreshToken).build();
@@ -173,11 +173,11 @@ public class SpotifyAPI {
                     ? authorizationCodeCredentials.getRefreshToken()
                     : refreshToken;
 
-            Utility.saveToDatabase("AUTH_TIME", Long.toString(System.currentTimeMillis() /
+            Utility.saveToFile("AUTH_TIME", Long.toString(System.currentTimeMillis() /
                     1000));
-            Utility.saveToDatabase("AUTH_ACCESS_TOKEN", accessToken);
-            Utility.saveToDatabase("AUTH_REFRESH_TOKEN", refreshToken);
-            Utility.saveToDatabase("EXPIRES_IN", Integer.toString(expiresIn));
+            Utility.saveToFile("AUTH_ACCESS_TOKEN", accessToken);
+            Utility.saveToFile("AUTH_REFRESH_TOKEN", refreshToken);
+            Utility.saveToFile("EXPIRES_IN", Integer.toString(expiresIn));
 
             spotifyApi.setAccessToken(accessToken);
             spotifyApi.setRefreshToken(refreshToken);
