@@ -19,8 +19,5 @@ WORKDIR /app
 # Copy the built JAR from the build stage
 COPY --from=build /app/target/TokenBot_1_maven-1.0-SNAPSHOT-jar-with-dependencies.jar /app/
 
-# Copy the config.properties file
-COPY config.properties /app/
-
 # Command to run the application
 CMD ["java", "-jar", "/app/TokenBot_1_maven-1.0-SNAPSHOT-jar-with-dependencies.jar"]
