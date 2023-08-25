@@ -17,15 +17,19 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 import javax.security.auth.login.LoginException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Main {
+    private static final Logger logger = LogManager.getLogger(Main.class);
+
     public static void main(String[] args) throws LoginException {
-        System.out.println(System.getenv("DATABASE_URL_ENV"));
-        System.out.println(System.getenv("DATABASE_URL"));
-        
+        logger.info(System.getenv("DATABASE_URL_ENV"));
+        logger.info(System.getenv("DATABASE_URL"));
+
         // bot
         JDABuilder builder = JDABuilder.createDefault(Utility.readFromDatabase("TOKEN"));
         SpotifyAPI spotifyApi = SpotifyAPI.getInstance();
