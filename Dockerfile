@@ -1,5 +1,5 @@
 # Step 1: Build the application
-FROM maven:3.8.7-openjdk-18 AS build
+FROM maven:3.8.6-openjdk-11 AS build
 
 WORKDIR /app
 
@@ -18,6 +18,9 @@ WORKDIR /app
 
 # Copy the built JAR from the build stage
 COPY --from=build /app/target/TokenBot_1_maven-1.0-SNAPSHOT-jar-with-dependencies.jar /app/
+
+# Copy the config.properties file
+COPY config.properties /app/
 
 # Command to run the application
 CMD ["java", "-jar", "/app/TokenBot_1_maven-1.0-SNAPSHOT-jar-with-dependencies.jar"]
