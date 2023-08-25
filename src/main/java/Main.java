@@ -24,9 +24,6 @@ import javax.security.auth.login.LoginException;
 public class Main {
     public static void main(String[] args) throws LoginException {
         // bot
-        final Logger LOGGER = Logger.getLogger(Main.class.getName());
-        LOGGER.info(Utility.readFromDatabase("TOKEN"));
-
         JDABuilder builder = JDABuilder.createDefault(Utility.readFromDatabase("TOKEN"));
         SpotifyAPI spotifyApi = SpotifyAPI.getInstance();
 
