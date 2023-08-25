@@ -29,6 +29,8 @@ public class Main {
     public static void main(String[] args) throws LoginException {
         logger.info(System.getenv("DATABASE_URL_ENV"));
         logger.info(System.getenv("DATABASE_URL"));
+        logger.error(System.getenv("DATABASE_URL_ENV"));
+        logger.error(System.getenv("DATABASE_URL"));
 
         // bot
         JDABuilder builder = JDABuilder.createDefault(Utility.readFromDatabase("TOKEN"));
