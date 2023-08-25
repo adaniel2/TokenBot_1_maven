@@ -21,9 +21,6 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws LoginException {
-        logger.info(System.getenv("DATABASE_URL"));
-        logger.error(System.getenv("DATABASE_URL"));
-
         // bot
         JDABuilder builder = JDABuilder.createDefault(Utility.readFromDatabase("TOKEN"));
         SpotifyAPI spotifyApi = SpotifyAPI.getInstance();
