@@ -39,14 +39,14 @@ public class Main {
             portNumber = 8080; // fallback to 8080 for local development
         }
 
-        
+
         port(portNumber);
 
         get("/spotify-redirect", (req, res) -> {
             String code = req.queryParams("code");
 
             if (code != null && !code.isEmpty()) {
-                Utility.saveToDatabase("SPOTIFY_AUTH_CODE", code); // Store the one-time auth code
+                Utility.saveToDatabase("SPOTIFY_AUTH_CODE", code); // Store one-time auth code
 
                 latch.countDown();
 
