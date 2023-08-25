@@ -38,7 +38,16 @@ public class Main {
 
         CountDownLatch latch = new CountDownLatch(1);
 
-        port(8080);
+        String portEnv = System.getenv("PORT");
+        int portNumber;
+
+        if (portEnv != null) {
+            portNumber = Integer.parseInt(portEnv);
+        } else {
+            portNumber = 8080; // fallback to 8080 for local development
+        }
+        
+        port(portNumber);
 
         get("/spotify-redirect", (req, res) -> {
             String code = req.queryParams("code");
