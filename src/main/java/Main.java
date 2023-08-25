@@ -27,7 +27,7 @@ public class Main {
 
         CountDownLatch latch = new CountDownLatch(1);
 
-        String portEnv = Utility.readFromDatabase("PORT");
+        String portEnv = System.getenv("PORT");
         int portNumber;
 
         if (portEnv != null) {
@@ -35,7 +35,6 @@ public class Main {
         } else {
             portNumber = 8080; // fallback to 8080 for local development
         }
-
 
         port(portNumber);
 
