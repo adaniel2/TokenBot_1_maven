@@ -2,6 +2,7 @@ package events;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -166,14 +167,25 @@ public class CommentWatcher extends ListenerAdapter {
 
     private void flagSubmitted(GuildMessageReceivedEvent e) {
         String submittedRoleId = Utility.readFromDatabase("SUBMITTED_ROLE_ID");
+        Member member = e.getMember();
 
-        net.dv8tion.jda.api.entities.Role submitted;
-        submitted = e.getGuild().getRoleById(submittedRoleId);
+        try {
+            if (member != null && submittedRoleId != null) {
+                net.dv8tion.jda.api.entities.Role submitted;
 
-        e.getGuild().getRoleById(submittedRoleId);
-        if (!e.getMember().getRoles().contains(submitted)) {
-            e.getMember().getRoles().add(submitted);
+                submitted = e.getGuild().getRoleById(submittedRoleId);
+                
+                if (!member.getRoles().contains(submitted)) {
+                    member.getRoles().add(submitted);
+                }
+            } else {
+                throw new NullPointerException();
+            }
+        } catch (NullPointerException | UnsupportedOperationException | ClassCastException
+                | IllegalArgumentException err) {
+            System.out.println("Error: " + err.getMessage());
         }
+
     }
 
     /**
