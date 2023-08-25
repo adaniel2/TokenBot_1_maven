@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import javax.annotation.Nonnull;
+
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
  */
 public class CommentWatcher extends ListenerAdapter {
     // variables & constants
-    private final String tokenName; // token name
+    private final String playlistTokenName; // playlist token name
     private final String chId; // comment channel id (submission channel)
     private final int INFO_COUNT; // if there's any info messages in the channel, define that number here
     private final boolean godMode; // allows posting without token (can be enabled for maintenance purposes)
@@ -43,7 +44,7 @@ public class CommentWatcher extends ListenerAdapter {
      * @param w  event waiter
      */
     public CommentWatcher(String tn, String cu, String ch, int IC, boolean gm, EventWaiter w, SpotifyAPI api) {
-        tokenName = tn;
+        playlistTokenName = tn;
         curatorID = cu;
         chId = ch;
         // waiter = w;
@@ -120,7 +121,8 @@ public class CommentWatcher extends ListenerAdapter {
                     event.getChannel().sendMessage("We got your submission <@" + event.getAuthor().getId()
                             + ">, thanks!").queue();
 
-                    // removeToken(event);
+                    // check for and give submitted token if needed
+                    flagSubmitted(event);
                 }
 
             }
@@ -162,6 +164,18 @@ public class CommentWatcher extends ListenerAdapter {
         return false;
     }
 
+    private void flagSubmitted(GuildMessageReceivedEvent e) {
+        String submittedRoleId = Utility.readFromDatabase("SUBMITTED_ROLE_ID");
+
+        net.dv8tion.jda.api.entities.Role submitted;
+        submitted = e.getGuild().getRoleById(submittedRoleId);
+
+        e.getGuild().getRoleById(submittedRoleId);
+        if (!e.getMember().getRoles().contains(submitted)) {
+            e.getMember().getRoles().add(submitted);
+        }
+    }
+
     /**
      * Given an event, return the number of messages before message
      * corresponding to the event.
@@ -186,7 +200,7 @@ public class CommentWatcher extends ListenerAdapter {
      * @param e event caused by user
      * @return whether the user has a token
      */
-    private boolean hasToken(GuildMessageReceivedEvent e) {
+    private boolean hasToken(GuildMessageReceivedEvent e, String tokenName) {
         boolean tokenFlag = false;
 
         // find role
@@ -207,7 +221,7 @@ public class CommentWatcher extends ListenerAdapter {
      *
      * @param e event containing user
      */
-    private void removeToken(GuildMessageReceivedEvent e) {
+    private void removeToken(GuildMessageReceivedEvent e, String tokenName) {
         // flag to prevent multiple token deletion
         boolean removed = false;
 
