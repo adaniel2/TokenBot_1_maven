@@ -8,12 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.1] - 26/08/2023
+## [1.0.2] - 26/08/2023
 
 ### Added
 
-- Message is now sent to user when an invalid URL is submitted
-- Duplicate checking: If a submission is already queued for review, discard duplicates and notify user
+
 
 ### Fixed
 
@@ -21,12 +20,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Renamed "info channel" to "help channel" and adjusted accordingly
-- Moved custom Exceptions to a dedicated folder
+
 
 ### Removed
 
 
+## [1.0.1] - 26/08/2023
+
+### Added
+
+- Message is now sent to user when an invalid URL is submitted
+- Duplicate checking: If a submission is already queued for review, discard duplicates and notify user
+
+### Changed
+
+- Renamed "info channel" to "help channel" and adjusted accordingly
+- Moved custom Exceptions to a dedicated folder
 
 ## [1.0.0] - 26/08/2023
 
