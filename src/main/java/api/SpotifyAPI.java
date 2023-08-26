@@ -2,6 +2,7 @@ package api;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,15 +10,22 @@ import org.apache.hc.core5.http.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import exceptions.DuplicateTrackException;
+import exceptions.MissingTokenException;
+import exceptions.TrackNotFoundException;
 import net.dv8tion.jda.api.entities.User;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.SpotifyHttpManager;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
+import se.michaelthelin.spotify.model_objects.specification.Paging;
+import se.michaelthelin.spotify.model_objects.specification.Playlist;
+import se.michaelthelin.spotify.model_objects.specification.PlaylistTrack;
 import se.michaelthelin.spotify.model_objects.specification.Track;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRefreshRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import se.michaelthelin.spotify.requests.data.playlists.AddItemsToPlaylistRequest;
+import se.michaelthelin.spotify.requests.data.playlists.GetPlaylistRequest;
 import se.michaelthelin.spotify.requests.data.tracks.GetTrackRequest;
 import utils.Utility;
 
@@ -77,24 +85,35 @@ public class SpotifyAPI {
                 Track track = getTrack(trackId);
 
                 if (track == null) {
-                    logger.error("Valid Spotify track link, but invalid track ID: " + trackId);
-
-                    return false;
+                    throw new TrackNotFoundException("Valid Spotify track link, but invalid track ID: " + trackId);
                 }
 
                 String[] trackUri = new String[] { getTrack(trackId).getUri() };
                 String playlistId = Utility.readFromDatabase("PLAYLIST_ID");
 
-                AddItemsToPlaylistRequest addItemsToPlaylistRequest = spotifyApi
-                        .addItemsToPlaylist(playlistId, trackUri)
-                        .position(0)
-                        .build();
+                Optional<Boolean> duplicate = isDuplicate(playlistId, track);
 
-                addItemsToPlaylistRequest.execute();
+                if (duplicate.isPresent()) {
+                    if (!duplicate.get()) {
+                        AddItemsToPlaylistRequest addItemsToPlaylistRequest = spotifyApi
+                                .addItemsToPlaylist(playlistId, trackUri)
+                                .position(0)
+                                .build();
 
-                logger.info("Track added to playlist.");
+                        addItemsToPlaylistRequest.execute();
 
-                return true;
+                        logger.info("Track added to playlist.");
+
+                        return true;
+                    }
+                    
+                    // duplicate entry
+                    throw new DuplicateTrackException("Duplicate entry found. This track is already in queue for review!");
+
+                } else { // error thrown when checking for duplicate
+                    return false;
+                }
+                
             } catch (IOException | SpotifyWebApiException | ParseException e) {
                 logger.error("Error: " + e.getMessage());
 
@@ -231,10 +250,29 @@ public class SpotifyAPI {
         return null;
     }
 
-    private class MissingTokenException extends Exception {
-        public MissingTokenException(String message) {
-            super(message);
+    private Optional<Boolean> isDuplicate(String playlistId, Track track) {
+        // sync call for metadata using spotify API
+        GetPlaylistRequest getPlaylistRequest = spotifyApi.getPlaylist(playlistId).build();
+
+        try {
+            Playlist playlist = getPlaylistRequest.execute();
+
+            Paging<PlaylistTrack> pager = playlist.getTracks();
+
+            PlaylistTrack[] playlistTracks = pager.getItems();
+
+            for (PlaylistTrack playlistTrack : playlistTracks) {
+                if (playlistTrack.getTrack().getId().equals(track.getId())) {
+                    return Optional.of(true);
+                }
+            }
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            logger.error("Error: " + e.getMessage());
+
+            return Optional.empty(); // Represents the absence of a result due to an error
         }
+
+        return Optional.of(false);
     }
 
 }

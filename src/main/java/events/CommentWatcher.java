@@ -3,6 +3,8 @@ package events;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 
 import api.SpotifyAPI;
+import exceptions.DuplicateTrackException;
+import exceptions.TrackNotFoundException;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -114,40 +116,65 @@ public class CommentWatcher extends ListenerAdapter {
 
                 if (isCurator(user) && godMode) {
                     // Admin/Curator is acting with God Mode ON
-                    submissionAdded = spotifyApi.addToPlaylist(messageSent.getContentRaw());
+                    try {
+                        submissionAdded = spotifyApi.addToPlaylist(messageSent.getContentRaw());
 
-                    if (submissionAdded) {
-                        event.getChannel()
-                                .sendMessage("Submission added by admin without using a token. <@" + user.getId() + ">")
-                                .queue();
-                    } else {
+                        if (submissionAdded) {
+                            event.getChannel()
+                                    .sendMessage(
+                                            "Submission added by admin without using a token. <@" + user.getId() + ">")
+                                    .queue();
+                        }
+                    } catch (DuplicateTrackException e) {
+                        String msg = e.getMessage();
+
+                        if (msg != null) {
+                            event.getChannel().sendMessage(msg).queue();
+                        }
+
+                        logger.error(e.getMessage());
+                    } catch (TrackNotFoundException e) {
                         event.getChannel()
                                 .sendMessage(
                                         "Unable to add submission without using a token because track does not exist: "
                                                 + spotifyMatcher.group(0))
                                 .queue();
+
+                        logger.error(e.getMessage());
                     }
                 } else if (hasToken(event, playlistTokenName)) {
                     // User has the token (or token requirement is off)
-                    submissionAdded = spotifyApi.addToPlaylist(messageSent.getContentRaw());
+                    try {
+                        submissionAdded = spotifyApi.addToPlaylist(messageSent.getContentRaw());
 
-                    if (submissionAdded) {
-                        event.getChannel()
-                                .sendMessage("We got your submission <@" + user.getId() + ">, thanks!")
-                                .queue();
+                        if (submissionAdded) {
+                            event.getChannel()
+                                    .sendMessage("We got your submission <@" + user.getId() + ">, thanks!")
+                                    .queue();
 
-                        flagSubmitted(event); // give user submitted token
+                            flagSubmitted(event); // give user submitted token
 
-                        // Only remove the token if token requirements are enabled
-                        if (tokenRequirementEnabled) {
-                            removeToken(event, playlistTokenName);
+                            // Only remove the token if token requirements are enabled
+                            if (tokenRequirementEnabled) {
+                                removeToken(event, playlistTokenName);
+                            }
                         }
-                    } else {
+                    } catch (DuplicateTrackException e) {
+                        String msg = e.getMessage();
+
+                        if (msg != null) {
+                            event.getChannel().sendMessage(msg).queue();
+                        }
+
+                        logger.error(e.getMessage());
+                    } catch (TrackNotFoundException e) {
                         event.getChannel()
                                 .sendMessage("Hey, I was unable to find the track you submitted: "
                                         + spotifyMatcher.group(0) + "\n\n" +
                                         "Please double check the link is correct!")
                                 .queue();
+
+                        logger.error(e.getMessage());
                     }
                 } else {
                     // Regular user without the required token
