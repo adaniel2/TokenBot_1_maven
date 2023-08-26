@@ -1,10 +1,13 @@
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+
+import api.SpotifyAPI;
 import commands.*;
 import events.CommentWatcher;
-import events.SpotifyAPI;
-import events.Utility;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import utils.Curator;
+import utils.Utility;
+
 import static spark.Spark.*;
 
 import java.util.ArrayList;
@@ -53,11 +56,12 @@ public class Main {
         });
 
         // server specific inputs
-        String targetChannelID = Utility.readFromDatabase("TARGET_CHANNEL_ID");
-        String helpChannelID = Utility.readFromDatabase("HELP_CHANNEL_ID");
-        String curatorID = Utility.readFromDatabase("CURATOR_ID");
+        String targetChannelId = Utility.readFromDatabase("TARGET_CHANNEL_ID");
+        String helpChannelId = Utility.readFromDatabase("HELP_CHANNEL_ID");
+        String adminId = Utility.readFromDatabase("ADMIN");
         String tokenName = Utility.readFromDatabase("TOKEN_NAME");
         String commandsChannelId = Utility.readFromDatabase("COMMANDS_CHANNEL_ID");
+        List<Curator> curators = Utility.readCuratorsFromDatabase().getCurators();
 
         // this token ID array increases in level (from left to right)
         List<String> tokenList = new ArrayList<>();
@@ -81,13 +85,13 @@ public class Main {
         builder.addEventListeners(waiter);
 
         // comments
-        CommentWatcher comments = new CommentWatcher(tokenName, curatorID, targetChannelID, 0, false, waiter,
+        CommentWatcher comments = new CommentWatcher(tokenName, adminId, curators, targetChannelId, 0, false, false, waiter,
                 spotifyApi);
 
         // commands
         TBBalanceCommand tbBalanceCommand = new TBBalanceCommand(tokenName, commandsChannelId);
         TBCommandsCommand tbCommandsCommand = new TBCommandsCommand(commandsChannelId);
-        TBHelpCommand tbHelpCommand = new TBHelpCommand(helpChannelID, commandsChannelId);
+        TBHelpCommand tbHelpCommand = new TBHelpCommand(helpChannelId, commandsChannelId);
 
         // add event listeners and build
         builder.addEventListeners(comments);
@@ -99,15 +103,15 @@ public class Main {
         JDA jda = builder.build();
 
         // init spotify app authentication
-        if (curatorID != null) {
-            jda.retrieveUserById(curatorID).queue(bonjr -> {
+        if (adminId != null) {
+            jda.retrieveUserById(adminId).queue(bonjr -> {
                 String initialAuthCode = Utility.readFromDatabase("SPOTIFY_AUTH_CODE");
 
                 if (initialAuthCode == null) {
                     spotifyApi.initiateAuthorization(bonjr); // Send the admin the auth link
 
                     try {
-                        if (!latch.await(30, TimeUnit.SECONDS)) {
+                        if (!latch.await(60, TimeUnit.SECONDS)) {
                             logger.error("Timeout while waiting for Spotify auth code. Please restart bot.");
                         } else {
                             // Read from file again in case it's changed after initiateAuthorization
@@ -128,7 +132,11 @@ public class Main {
                         logger.error("Error: " + e.getMessage());
                     }
                 } else if (spotifyApi.isAccessExpired()) {
-                    comments.setBotIsReady(spotifyApi.refreshTokens());
+                    if (spotifyApi.refreshTokens()) {
+                        comments.setBotIsReady(true);
+
+                        logger.info("Bot is ready.");
+                    }
                 } else {
                     // bot is ready
                     comments.setBotIsReady(true);
@@ -139,7 +147,7 @@ public class Main {
             });
         }
         else {
-            logger.error("No curator ID provided. Authentication is not possible!");
+            logger.error("No admin ID provided. Authentication is not possible!");
         }
 
     }

@@ -1,4 +1,4 @@
-package events;
+package api;
 
 import java.io.IOException;
 import java.net.URI;
@@ -19,15 +19,17 @@ import se.michaelthelin.spotify.requests.authorization.authorization_code.Author
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import se.michaelthelin.spotify.requests.data.playlists.AddItemsToPlaylistRequest;
 import se.michaelthelin.spotify.requests.data.tracks.GetTrackRequest;
+import utils.Utility;
 
 public class SpotifyAPI {
     private static SpotifyAPI instance;
     private SpotifyApi spotifyApi;
-    private static final URI redirectUri = SpotifyHttpManager.makeUri(Utility.readFromDatabase("URI_STRING"));
     private String authorizationCode;
     private AuthorizationCodeCredentials authorizationCodeCredentials;
     private String accessToken;
     private String refreshToken;
+
+    private static final URI redirectUri = SpotifyHttpManager.makeUri(Utility.readFromDatabase("URI_STRING"));
     private static final Logger logger = LoggerFactory.getLogger(SpotifyAPI.class);
 
     // constructor
@@ -36,7 +38,7 @@ public class SpotifyAPI {
         accessToken = Utility.readFromDatabase("AUTH_ACCESS_TOKEN");
         refreshToken = Utility.readFromDatabase("AUTH_REFRESH_TOKEN");
 
-        // authentication
+        // build
         this.spotifyApi = new SpotifyApi.Builder()
                 .setClientId(Utility.readFromDatabase("APP_CLIENT_ID"))
                 .setClientSecret(Utility.readFromDatabase("CLIENT_SECRET"))
@@ -65,13 +67,21 @@ public class SpotifyAPI {
             refreshTokens();
         }
 
-        Pattern pattern = Pattern.compile("/(track|album)/([a-zA-Z0-9]+)\\?");
+        Pattern pattern = Pattern.compile("(spotify:track:|\\/track\\/)([a-zA-Z0-9]+)(\\?|\\s|$)");
         Matcher matcher = pattern.matcher(trackLink);
 
         if (matcher.find()) {
             String trackId = matcher.group(2);
 
             try {
+                Track track = getTrack(trackId);
+
+                if (track == null) {
+                    logger.error("Valid Spotify track link, but invalid track ID: " + trackId);
+
+                    return false;
+                }
+
                 String[] trackUri = new String[] { getTrack(trackId).getUri() };
                 String playlistId = Utility.readFromDatabase("PLAYLIST_ID");
 
@@ -85,7 +95,7 @@ public class SpotifyAPI {
                 logger.info("Track added to playlist.");
 
                 return true;
-            } catch (IOException | SpotifyWebApiException | ParseException | NullPointerException e) {
+            } catch (IOException | SpotifyWebApiException | ParseException e) {
                 logger.error("Error: " + e.getMessage());
 
                 return false;
@@ -109,7 +119,7 @@ public class SpotifyAPI {
                 .toString();
 
         if (authorizeUrl != null) {
-            Utility.sendSecretMessage(bonjr, authorizeUrl, 30).queue();
+            Utility.sendSecretMessage(bonjr, authorizeUrl, 60).queue();
         }
 
     }
@@ -180,7 +190,6 @@ public class SpotifyAPI {
             String newRefreshToken = (authorizationCodeCredentials.getRefreshToken() != null)
                     ? authorizationCodeCredentials.getRefreshToken()
                     : refreshToken;
-                    
 
             Utility.saveToDatabase("AUTH_TIME", Long.toString(System.currentTimeMillis() /
                     1000));

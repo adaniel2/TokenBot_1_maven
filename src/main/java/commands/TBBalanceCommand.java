@@ -51,7 +51,7 @@ public class TBBalanceCommand extends ListenerAdapter {
 
             if (member != null) {
                 for (int i = 0; i < Objects.requireNonNull(member).getRoles().size(); i++) {
-                    if (member.getRoles().get(i).getName().contains(tokenName)) {
+                    if (member.getRoles().get(i).getName() == tokenName) {
                         // increase count
                         nTokens++;
                     }

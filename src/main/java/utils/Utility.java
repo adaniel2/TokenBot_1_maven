@@ -1,4 +1,4 @@
-package events;
+package utils;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -19,6 +19,9 @@ import net.dv8tion.jda.api.requests.RestAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class Utility {
     private static final Properties properties = new Properties();
     private static final Logger logger = LoggerFactory.getLogger(Utility.class);
@@ -37,7 +40,7 @@ public class Utility {
         return user.openPrivateChannel() // RestAction<PrivateChannel>
                 .flatMap(channel -> channel.sendMessage(content)) // RestAction<Message>
                 .delay(time, TimeUnit.SECONDS) // RestAction<Message> with delayed response
-                .flatMap(Message::delete); // RestAction<Void> (executed 300 seconds after sending)
+                .flatMap(Message::delete); // RestAction<Void> (executed x seconds after sending)
     }
 
     public static void saveToFile(String key, String value) {
@@ -126,6 +129,19 @@ public class Utility {
                 + password;
 
         return jdbcUrl;
+    }
+
+    public static CuratorList readCuratorsFromDatabase() {
+        String json = readFromDatabase("CURATORS");
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            return mapper.readValue(json, CuratorList.class);
+        } catch (JsonProcessingException e) {
+            // Handle the exception
+            return null;
+        }
     }
 
 }
