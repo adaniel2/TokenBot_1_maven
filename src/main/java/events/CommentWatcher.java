@@ -95,6 +95,7 @@ public class CommentWatcher extends ListenerAdapter {
             // exit if bot is not ready
             if (!botIsReady) {
                 messageSent.delete().queue();
+
                 commentRemoved = true;
 
                 logger.error("Bot is not ready.");
@@ -112,6 +113,8 @@ public class CommentWatcher extends ListenerAdapter {
                 // delete link if not proper format
                 if (!isTrackLink(event)) { // format check
                     messageSent.delete().queue();
+
+                    logger.warn("Invalid submission deleted.");
 
                     commentRemoved = true;
                 }
@@ -136,11 +139,13 @@ public class CommentWatcher extends ListenerAdapter {
         // god mode case; posting without a token
         if (!event.getAuthor().isBot() && event.getChannel().getId().equals(chId) && commentRemoved == null) {
             // alert console
-            logger.info("An admin-level action was performed by: " + event.getAuthor().getName());
+            logger.warn("An admin-level action was performed by: " + event.getAuthor().getName());
 
             // message deletion condition
             if (!godMode) {
                 event.getMessage().delete().queue();
+
+                logger.warn("Invalid submission deleted.");
             }
 
         }
@@ -197,7 +202,7 @@ public class CommentWatcher extends ListenerAdapter {
             return false;
         }
 
-        logger.error("Not a recognized Spotify link.");
+        logger.warn("Not a recognized Spotify link.");
 
         return false;
     }

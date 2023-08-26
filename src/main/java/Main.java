@@ -120,6 +120,8 @@ public class Main {
 
                                 // bot is ready
                                 comments.setBotIsReady(true);
+
+                                logger.info("Bot is ready.");
                             }
                         }
                     } catch (InterruptedException e) {
@@ -130,6 +132,8 @@ public class Main {
                 } else {
                     // bot is ready
                     comments.setBotIsReady(true);
+
+                    logger.info("Bot is ready.");
                 }
 
             });

@@ -82,6 +82,8 @@ public class SpotifyAPI {
 
                 addItemsToPlaylistRequest.execute();
 
+                logger.info("Track added to playlist.");
+
                 return true;
             } catch (IOException | SpotifyWebApiException | ParseException | NullPointerException e) {
                 logger.error("Error: " + e.getMessage());
@@ -91,7 +93,7 @@ public class SpotifyAPI {
 
         } else {
             // Handle the case where no match was found
-            logger.error("Provided URL does not match expected format(s): " + trackLink);
+            logger.warn("Provided URL does not match expected format(s): " + trackLink);
 
             return false;
         }
