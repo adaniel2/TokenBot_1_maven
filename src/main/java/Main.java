@@ -99,39 +99,44 @@ public class Main {
         JDA jda = builder.build();
 
         // init spotify app authentication
-        jda.retrieveUserById(curatorID).queue(bonjr -> {
-            String initialAuthCode = Utility.readFromDatabase("SPOTIFY_AUTH_CODE");
+        if (curatorID != null) {
+            jda.retrieveUserById(curatorID).queue(bonjr -> {
+                String initialAuthCode = Utility.readFromDatabase("SPOTIFY_AUTH_CODE");
 
-            if (initialAuthCode == null) {
-                spotifyApi.initiateAuthorization(bonjr); // Send the admin the auth link
+                if (initialAuthCode == null) {
+                    spotifyApi.initiateAuthorization(bonjr); // Send the admin the auth link
 
-                try {
-                    if (!latch.await(30, TimeUnit.SECONDS)) {
-                        System.out.println("Timeout while waiting for Spotify auth code. Please restart bot.");
-                    } else {
-                        // Read from file again in case it's changed after initiateAuthorization
-                        String newAuthCode = Utility.readFromDatabase("SPOTIFY_AUTH_CODE");
+                    try {
+                        if (!latch.await(30, TimeUnit.SECONDS)) {
+                            logger.error("Timeout while waiting for Spotify auth code. Please restart bot.");
+                        } else {
+                            // Read from file again in case it's changed after initiateAuthorization
+                            String newAuthCode = Utility.readFromDatabase("SPOTIFY_AUTH_CODE");
 
-                        if (newAuthCode != null) {
-                            spotifyApi.setAuthorizationCode(newAuthCode);
+                            if (newAuthCode != null) {
+                                spotifyApi.setAuthorizationCode(newAuthCode);
 
-                            spotifyApi.setupAccessAndRefreshToken(); // Get and set the access and refresh tokens
+                                spotifyApi.setupAccessAndRefreshToken(); // Get and set the access and refresh tokens
 
-                            // bot is ready
-                            comments.setBotIsReady(true);
+                                // bot is ready
+                                comments.setBotIsReady(true);
+                            }
                         }
+                    } catch (InterruptedException e) {
+                        logger.error("Error: " + e.getMessage());
                     }
-                } catch (InterruptedException e) {
-                    System.out.println("Error: " + e.getMessage());
+                } else if (spotifyApi.isAccessExpired()) {
+                    comments.setBotIsReady(spotifyApi.refreshTokens());
+                } else {
+                    // bot is ready
+                    comments.setBotIsReady(true);
                 }
-            } else if (spotifyApi.isTokenExpired()) {
-                comments.setBotIsReady(spotifyApi.refreshToken());
-            } else {
-                // bot is ready
-                comments.setBotIsReady(true);
-            }
 
-        });
+            });
+        }
+        else {
+            logger.error("No curator ID provided. Authentication is not possible!");
+        }
 
     }
 

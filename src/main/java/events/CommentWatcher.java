@@ -5,12 +5,17 @@ import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import javax.annotation.Nonnull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +38,7 @@ public class CommentWatcher extends ListenerAdapter {
     // private final EventWaiter waiter; // EventWaiter
     private SpotifyAPI spotifyApi; // api
     private boolean botIsReady;
+    private static final Logger logger = LoggerFactory.getLogger(CommentWatcher.class);
 
     /**
      * Constructor for CommentWatcher initializes variables.
@@ -85,14 +91,13 @@ public class CommentWatcher extends ListenerAdapter {
         } else if (!event.getAuthor().isBot() /* && hasToken(event) */) { // bot check (and token check just in case)
             // grab event's message and user
             Message messageSent = event.getMessage();
-            User user = event.getAuthor();
 
             // exit if bot is not ready
             if (!botIsReady) {
                 messageSent.delete().queue();
                 commentRemoved = true;
 
-                System.out.println("Bot is not ready.");
+                logger.error("Bot is not ready.");
 
                 return;
             }
@@ -107,12 +112,8 @@ public class CommentWatcher extends ListenerAdapter {
                 // delete link if not proper format
                 if (!isTrackLink(event)) { // format check
                     messageSent.delete().queue();
-                    commentRemoved = true;
 
-                    Utility.sendSecretMessage(user,
-                            "Spotify track links only! If the link continues to give this error, " +
-                                    "check the #playlist-token-info channel for more information.",
-                            10).queue();
+                    commentRemoved = true;
                 }
 
                 // comment not removed, carry on with submission
@@ -124,6 +125,8 @@ public class CommentWatcher extends ListenerAdapter {
 
                     // check for and give submitted token if needed
                     flagSubmitted(event);
+
+                    // removeToken(event, playlistTokenName);
                 }
 
             }
@@ -133,7 +136,7 @@ public class CommentWatcher extends ListenerAdapter {
         // god mode case; posting without a token
         if (!event.getAuthor().isBot() && event.getChannel().getId().equals(chId) && commentRemoved == null) {
             // alert console
-            System.out.println("An admin-level action was performed by: " + event.getAuthor().getName());
+            logger.info("An admin-level action was performed by: " + event.getAuthor().getName());
 
             // message deletion condition
             if (!godMode) {
@@ -153,14 +156,48 @@ public class CommentWatcher extends ListenerAdapter {
     private boolean isTrackLink(GuildMessageReceivedEvent e) {
         // grab the message being checked
         Message m = e.getMessage();
+        User user = e.getAuthor();
+        String contentType = "";
 
-        // return if format is proper
-        String regEx = "^(?:spotify:|(?:https?://(?:open|play)\\.spotify\\.com/))(?:embed)?/?(album|track)";
+        // format
+        String regEx = "^(?:spotify:|(?:https?://(?:open|play)\\.spotify\\.com/))(?:embed)?/?(album|track|playlist)";
         Matcher match = Pattern.compile(regEx).matcher(m.getContentRaw());
 
-        if (match.find()) {
-            return match.group(1).equals("track");
+        if (match.find()) { // spotify album, track or playlist link found
+            logger.info("Recognized Spotify link provided.");
+
+            switch (match.group(1)) {
+                case "album":
+                    logger.info("Spotify album link provided.");
+
+                    contentType = "album";
+
+                    break;
+                case "track":
+                    logger.info("Spotify track link provided.");
+
+                    contentType = "track";
+
+                    return true;
+                case "playlist":
+                    logger.info("Spotify playlist link provided.");
+
+                    contentType = "playlist";
+
+                    break;
+            }
+
+            Utility.sendSecretMessage(user,
+                    "Provided link type: " + contentType + "\n\n" +
+                            "This is not a track link! Please pick a single track to submit." +
+                            "Please check the #playlist-token-info channel for more information.\n\n" +
+                            "Note: This message will disappear after 30 seconds.",
+                    30).queue();
+
+            return false;
         }
+
+        logger.error("Not a recognized Spotify link.");
 
         return false;
     }
@@ -174,16 +211,16 @@ public class CommentWatcher extends ListenerAdapter {
                 net.dv8tion.jda.api.entities.Role submitted;
 
                 submitted = e.getGuild().getRoleById(submittedRoleId);
-                
-                if (!member.getRoles().contains(submitted)) {
-                    member.getRoles().add(submitted);
+
+                if (submitted != null && !member.getRoles().contains(submitted)) {
+                    e.getGuild().addRoleToMember(member, submitted).queue();
                 }
             } else {
-                throw new NullPointerException();
+                throw new NullPointerException("User or Role missing.");
             }
         } catch (NullPointerException | UnsupportedOperationException | ClassCastException
                 | IllegalArgumentException err) {
-            System.out.println("Error: " + err.getMessage());
+            logger.error("Error: " + err.getMessage());
         }
 
     }
@@ -215,12 +252,18 @@ public class CommentWatcher extends ListenerAdapter {
     private boolean hasToken(GuildMessageReceivedEvent e, String tokenName) {
         boolean tokenFlag = false;
 
-        // find role
-        for (int i = 0; i < Objects.requireNonNull(e.getMember()).getRoles().size() && !tokenFlag; i++) {
-            if (e.getMember().getRoles().get(i).getName().contains(tokenName)) {
-                // has a token
-                tokenFlag = true;
+        Member member = e.getMember();
+
+        if (member != null) {
+            // find role
+            for (int i = 0; i < Objects.requireNonNull(member).getRoles().size() && !tokenFlag; i++) {
+                if (member.getRoles().get(i).getName().contains(tokenName)) {
+                    // has a token
+                    tokenFlag = true;
+                }
             }
+
+            return tokenFlag;
         }
 
         return tokenFlag;
@@ -237,16 +280,25 @@ public class CommentWatcher extends ListenerAdapter {
         // flag to prevent multiple token deletion
         boolean removed = false;
 
-        // cycle through roles to find token
-        for (int i = 0; i < Objects.requireNonNull(e.getMember()).getRoles().size(); i++) {
-            if (e.getMember().getRoles().get(i).getName().contains(tokenName) && !removed) {
-                // remove role from user
-                e.getGuild().removeRoleFromMember(e.getMember(), e.getMember().getRoles().get(i)).queue();
+        Member member = e.getMember();
 
-                // set flag
-                removed = true;
+        if (member != null) {
+            Optional<Role> optionalRole = member.getRoles().stream()
+                    .filter(role -> role.getName().contains(tokenName))
+                    .findFirst();
+
+            if (optionalRole.isPresent() && !removed) {
+                Role role = optionalRole.get();
+
+                if (role != null) { // redundant but silences warning
+                    e.getGuild().removeRoleFromMember(member, role).queue();
+
+                    removed = true;
+                }
             }
+
         }
+
     }
 
     /**

@@ -3,9 +3,10 @@ package commands;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+
+import javax.annotation.Nonnull;
 
 /**
  * This is the commands command. Returns an embed of commands available.
@@ -31,7 +32,7 @@ public class TBCommandsCommand extends ListenerAdapter {
      *
      * @param e guild message event
      */
-    public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent e) {
+    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent e) {
         // grab message
         String message = e.getMessage().getContentRaw();
 

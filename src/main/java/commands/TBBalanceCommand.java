@@ -1,10 +1,12 @@
 package commands;
 
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+
+import javax.annotation.Nonnull;
 
 /**
  * This is the balance command. It will return the number of token(s) a user
@@ -36,7 +38,7 @@ public class TBBalanceCommand extends ListenerAdapter {
      * @param e guild message event
      */
     @Override
-    public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent e) {
+    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent e) {
         // grab message
         String message = e.getMessage().getContentRaw();
 
@@ -45,16 +47,21 @@ public class TBBalanceCommand extends ListenerAdapter {
             // count number of tokens
             int nTokens = 0;
 
-            for (int i = 0; i < Objects.requireNonNull(e.getMember()).getRoles().size(); i++) {
-                if (e.getMember().getRoles().get(i).getName().contains(tokenName)) {
-                    // increase count
-                    nTokens++;
+            Member member = e.getMember();
+
+            if (member != null) {
+                for (int i = 0; i < Objects.requireNonNull(member).getRoles().size(); i++) {
+                    if (member.getRoles().get(i).getName().contains(tokenName)) {
+                        // increase count
+                        nTokens++;
+                    }
                 }
+
+                // reply
+                e.getChannel().sendMessage("<@" + e.getAuthor().getId() + ">,"
+                        + " your token balance is: " + nTokens).queue();
             }
 
-            // reply
-            e.getChannel().sendMessage("<@" + e.getAuthor().getId() + ">,"
-                    + " your token balance is: " + nTokens).queue();
         }
 
     }

@@ -6,6 +6,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.hc.core5.http.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.dv8tion.jda.api.entities.User;
 import se.michaelthelin.spotify.SpotifyApi;
@@ -26,6 +28,7 @@ public class SpotifyAPI {
     private AuthorizationCodeCredentials authorizationCodeCredentials;
     private String accessToken;
     private String refreshToken;
+    private static final Logger logger = LoggerFactory.getLogger(SpotifyAPI.class);
 
     // constructor
     private SpotifyAPI() {
@@ -58,8 +61,8 @@ public class SpotifyAPI {
     }
 
     public Boolean addToPlaylist(String trackLink) {
-        if (isTokenExpired()) {
-            refreshToken();
+        if (isAccessExpired()) {
+            refreshTokens();
         }
 
         Pattern pattern = Pattern.compile("/(track|album)/([a-zA-Z0-9]+)\\?");
@@ -81,14 +84,14 @@ public class SpotifyAPI {
 
                 return true;
             } catch (IOException | SpotifyWebApiException | ParseException | NullPointerException e) {
-                System.out.println("Error: " + e.getMessage());
+                logger.error("Error: " + e.getMessage());
 
                 return false;
             }
 
         } else {
             // Handle the case where no match was found
-            System.out.println("No match found in the provided URL: " + trackLink);
+            logger.error("Provided URL does not match expected format(s): " + trackLink);
 
             return false;
         }
@@ -103,7 +106,10 @@ public class SpotifyAPI {
                 .execute()
                 .toString();
 
-        Utility.sendSecretMessage(bonjr, authorizeUrl, 30).queue();
+        if (authorizeUrl != null) {
+            Utility.sendSecretMessage(bonjr, authorizeUrl, 30).queue();
+        }
+
     }
 
     public void setupAccessAndRefreshToken() {
@@ -125,14 +131,14 @@ public class SpotifyAPI {
             spotifyApi.setAccessToken(accessToken);
             spotifyApi.setRefreshToken(refreshToken);
 
-            System.out.println("Token lifespan: " + expiresIn + " seconds = " + expiresIn / 60 + " minutes");
+            logger.info("Token lifespan: " + expiresIn + " seconds = " + expiresIn / 60 + " minutes");
 
         } catch (ParseException | SpotifyWebApiException | IOException e) {
-            System.out.println("Error: " + e.getMessage());
+            logger.error("Error: " + e.getMessage());
         }
     }
 
-    public boolean isTokenExpired() {
+    public boolean isAccessExpired() {
         try {
             if (accessToken == null || refreshToken == null) {
                 throw new MissingTokenException("Access/Refresh token(s) missing.");
@@ -145,19 +151,19 @@ public class SpotifyAPI {
             long timeElapsed = (currentTimeInSeconds - authTime);
 
             if (timeElapsed <= expiresIn) {
-                System.out.println("Time since last authentication: " + timeElapsed);
+                logger.info("Time since last authentication: " + timeElapsed);
             }
 
             return timeElapsed > expiresIn;
         } catch (MissingTokenException e) { // refresh token will handle both expired and does not exist cases
-            System.out.println("Error: " + e.getMessage());
+            logger.error("Error: " + e.getMessage());
 
             return true;
         }
 
     }
 
-    public boolean refreshToken() {
+    public boolean refreshTokens() {
         String clientId = Utility.readFromDatabase("APP_CLIENT_ID");
         String secret = Utility.readFromDatabase("CLIENT_SECRET");
 
@@ -169,24 +175,30 @@ public class SpotifyAPI {
 
             int expiresIn = authorizationCodeCredentials.getExpiresIn();
             accessToken = authorizationCodeCredentials.getAccessToken();
-            refreshToken = (authorizationCodeCredentials.getRefreshToken() != null)
+            String newRefreshToken = (authorizationCodeCredentials.getRefreshToken() != null)
                     ? authorizationCodeCredentials.getRefreshToken()
                     : refreshToken;
+                    
 
             Utility.saveToDatabase("AUTH_TIME", Long.toString(System.currentTimeMillis() /
                     1000));
             Utility.saveToDatabase("AUTH_ACCESS_TOKEN", accessToken);
-            Utility.saveToDatabase("AUTH_REFRESH_TOKEN", refreshToken);
             Utility.saveToDatabase("EXPIRES_IN", Integer.toString(expiresIn));
 
             spotifyApi.setAccessToken(accessToken);
-            spotifyApi.setRefreshToken(refreshToken);
 
-            System.out.println("Token refreshed.");
+            logger.info("Access token refreshed.");
+
+            if (newRefreshToken != refreshToken) {
+                Utility.saveToDatabase("AUTH_REFRESH_TOKEN", newRefreshToken);
+                spotifyApi.setRefreshToken(newRefreshToken);
+
+                logger.info("Refresh token refreshed.");
+            }
 
             return true;
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            System.out.println("Error: " + e.getMessage());
+            logger.error("Error: " + e.getMessage());
 
             return false;
         }
@@ -202,7 +214,7 @@ public class SpotifyAPI {
 
             return track;
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            System.out.println("Error: " + e.getMessage());
+            logger.error("Error: " + e.getMessage());
         }
 
         return null;

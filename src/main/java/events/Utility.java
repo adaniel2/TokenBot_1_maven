@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nonnull;
+
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -31,7 +33,7 @@ public class Utility {
      * @return RestAction - Type: PrivateChannel
      *         Retrieves the PrivateChannel to use to directly message this User.
      */
-    public static RestAction<Void> sendSecretMessage(User user, String content, int time) {
+    public static RestAction<Void> sendSecretMessage(User user, @Nonnull String content, int time) {
         return user.openPrivateChannel() // RestAction<PrivateChannel>
                 .flatMap(channel -> channel.sendMessage(content)) // RestAction<Message>
                 .delay(time, TimeUnit.SECONDS) // RestAction<Message> with delayed response
@@ -44,7 +46,7 @@ public class Utility {
         try (FileOutputStream outputStream = new FileOutputStream("config.properties")) {
             properties.store(outputStream, "Configurations");
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            logger.error("Error: " + e.getMessage());
         }
     }
 
@@ -54,7 +56,7 @@ public class Utility {
 
             return properties.getProperty(key);
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            logger.error("Error: " + e.getMessage());
 
             return null;
         }
@@ -72,7 +74,7 @@ public class Utility {
 
             stmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            logger.error("Error: " + e.getMessage());
         }
     }
 
@@ -90,7 +92,7 @@ public class Utility {
                 return rs.getString("value");
             }
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            logger.error("Error: " + e.getMessage());
         }
 
         return null;
