@@ -18,16 +18,16 @@ import javax.annotation.Nonnull;
  */
 public class TBHelpCommand extends ListenerAdapter {
     // variables & constants
-    private final String infoChId;
+    private final String helpChId;
     private final String commandsChId;
 
     /**
-     * Constructor for the server's info channel ID.
+     * Constructor for the server's help channel ID.
      *
-     * @param ch info channel ID
+     * @param ch help channel ID
      */
     public TBHelpCommand(String ch, String cmd_ch) {
-        infoChId = ch;
+        helpChId = ch;
         commandsChId = cmd_ch;
     }
 
@@ -50,7 +50,7 @@ public class TBHelpCommand extends ListenerAdapter {
 
             String msg = "\nHi, i'm TokenBot and I was built to help manage submissions on this server " +
                     "^_^\n\n" +
-                    "To learn how to submit, check out the <#" + infoChId + "> channel for full instructions.\n\n" +
+                    "To learn how to submit, check out the <#" + helpChId + "> channel for full instructions.\n\n" +
                     "I also provide some commands `]commands` that you may use, check them out!";
 
             eb.addField("`Version 1.0`", msg, true);

@@ -34,8 +34,9 @@ import java.util.regex.Pattern;
 public class CommentWatcher extends ListenerAdapter {
     // variables & constants
     private final String playlistTokenName; // playlist token name
-    private final String chId; // comment channel id (submission channel)
-    private final int INFO_COUNT; // if there's any info messages in the channel, define that number here
+    private final String chId; // comment channel ID (submission channel)
+    private final String helpChId; // help channel ID
+    private final int HELP_COUNT; // if there's any help messages in the channel, define that number here
     private final boolean godMode; // allows posting without token (can be enabled for maintenance purposes)
     private final String adminId; // admin
     private final List<Curator> curators; // curators
@@ -56,20 +57,21 @@ public class CommentWatcher extends ListenerAdapter {
      * @param adm    admin's ID
      * @param cu     curator list
      * @param ch     submission channel ID
-     * @param IC     no. of permanent info/instruction messages in channel
+     * @param IC     no. of permanent help/instruction messages in channel
      * @param gm     god mode
      * @param tknReq token requirement
      * @param w      event waiter
      * @param api    spotify api
      */
-    public CommentWatcher(String tn, String adm, List<Curator> cu, String ch, int IC, boolean gm,
+    public CommentWatcher(String tn, String adm, List<Curator> cu, String ch, String hlp, int HC, boolean gm,
             boolean tknReq,
             EventWaiter w, SpotifyAPI api) {
         playlistTokenName = tn;
         adminId = adm;
         curators = cu;
         chId = ch;
-        INFO_COUNT = IC;
+        helpChId = hlp;
+        HELP_COUNT = HC;
         godMode = gm;
         tokenRequirementEnabled = tknReq;
         waiter = w;
@@ -163,6 +165,12 @@ public class CommentWatcher extends ListenerAdapter {
             // Handle non-Spotify URLs
             messageSent.delete().queue();
 
+            Utility.sendSecretMessage(user,
+                    "Hello o/, I saw your submission, but I only accept Spotify links!\n\n" +
+                            "Check out the <#" + helpChId + "> channel for more details!\n\n" +
+                            "Note: This message will be deleted after 60 seconds.",
+                    60).queue();
+
             logger.warn("Invalid link deleted.");
         }
 
@@ -212,7 +220,7 @@ public class CommentWatcher extends ListenerAdapter {
             Utility.sendSecretMessage(user,
                     "Provided " + uriOrLink + ": " + contentType + "\n\n" +
                             "This is not a track link! Please pick a single track to submit." +
-                            " Check the #hidden-gems-info channel for more information.\n\n" +
+                            " Check the #hidden-gems-help channel for more information.\n\n" +
                             "Note: This message will disappear after 60 seconds.",
                     60).queue();
 
@@ -265,8 +273,8 @@ public class CommentWatcher extends ListenerAdapter {
         // grab message
         Message msg = e.getMessage();
 
-        // return comment count (limit is 100) accounting for info messages
-        return ch.getHistoryBefore(msg.getId(), 100).complete().getRetrievedHistory().size() - INFO_COUNT;
+        // return comment count (limit is 100) accounting for help messages
+        return ch.getHistoryBefore(msg.getId(), 100).complete().getRetrievedHistory().size() - HELP_COUNT;
     }
 
     /**

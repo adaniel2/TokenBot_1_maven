@@ -85,7 +85,7 @@ public class Main {
         builder.addEventListeners(waiter);
 
         // comments
-        CommentWatcher comments = new CommentWatcher(tokenName, adminId, curators, targetChannelId, 0, false, false, waiter,
+        CommentWatcher comments = new CommentWatcher(tokenName, adminId, curators, targetChannelId, helpChannelId, 0, false, false, waiter,
                 spotifyApi);
 
         // commands
