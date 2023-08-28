@@ -149,7 +149,10 @@ public class CommentWatcher extends ListenerAdapter {
 
                         if (submissionAdded) {
                             event.getChannel()
-                                    .sendMessage("We got your submission <@" + user.getId() + ">, thanks!")
+                                    .sendMessage(
+                                            "<@" + user.getId() + "> " +
+                                                    "I got your submission and it should be visible here: https://bonjr.me/submissions\n\n"
+                                                    + "Good luck!")
                                     .queue();
 
                             flagSubmitted(event); // give user submitted token
@@ -229,19 +232,19 @@ public class CommentWatcher extends ListenerAdapter {
 
             switch (contentType) {
                 case "album":
-                    logger.info("Spotify album " + uriOrLink + "provided.");
+                    logger.info("Spotify album " + uriOrLink + " provided.");
 
                     break;
                 case "track":
-                    logger.info("Spotify track " + uriOrLink + "provided.");
+                    logger.info("Spotify track " + uriOrLink + " provided.");
 
                     return true;
                 case "playlist":
-                    logger.info("Spotify playlist " + uriOrLink + "provided.");
+                    logger.info("Spotify playlist " + uriOrLink + " provided.");
 
                     break;
                 default:
-                    logger.warn("Unknown Spotify " + uriOrLink + "type.");
+                    logger.warn("Unknown Spotify " + uriOrLink + " type.");
             }
 
             Utility.sendSecretMessage(user,
