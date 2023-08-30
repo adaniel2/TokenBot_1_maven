@@ -151,7 +151,7 @@ public class CommentWatcher extends ListenerAdapter {
                             event.getChannel()
                                     .sendMessage(
                                             "<@" + user.getId() + "> " +
-                                                    "I got your submission and it should be visible here: https://bonjr.me/submissions\n\n"
+                                                    "I got your submission and it should be visible here: <https://bonjr.me/submissions>\n\n"
                                                     + "Good luck!")
                                     .queue();
 

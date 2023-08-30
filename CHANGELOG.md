@@ -8,11 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 30/08/2023
+
+### Changed
+
+- Removed embeds from message sent by bot confirming submission
+
 ## [1.0.2] - 28/08/2023
-
-### Added
-
-
 
 ### Fixed
 
@@ -22,9 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Committing fully to "TokenBot" as app name
 - Improved successful submission message
-
-### Removed
-
 
 ## [1.0.1] - 26/08/2023
 
