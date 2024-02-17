@@ -35,13 +35,13 @@ public class TBHelpCommand extends ListenerAdapter {
      * Reply with a help message providing caller with how-to information regarding
      * the bot's purpose and available functions.
      *
-     * @param e guild message event
+     * @param event guild message event
      */
-    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent e) {
+    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
         // grab message
-        String message = e.getMessage().getContentRaw();
+        String message = event.getMessage().getContentRaw();
 
-        if (message.equals("]help") && e.getChannel().getId().equals(commandsChId)) {
+        if (message.equals("]help") && event.getChannel().getId().equals(commandsChId)) {
             // embed builder
             EmbedBuilder eb = new EmbedBuilder();
 
@@ -56,7 +56,7 @@ public class TBHelpCommand extends ListenerAdapter {
             eb.addField("`Version 1.0`", msg, true);
 
             // reply
-            e.getChannel().sendMessage(eb.build()).queue();
+            event.getChannel().sendMessage(eb.build()).queue();
         }
 
     }

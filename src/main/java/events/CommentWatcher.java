@@ -67,7 +67,7 @@ public class CommentWatcher extends ListenerAdapter {
      */
     public CommentWatcher(String tn, String adm, List<Curator> cu, String ch, String hlp, int HC, boolean gm,
             boolean tknReq,
-            EventWaiter w, SpotifyAPI api) {
+            EventWaiter w) {
         playlistTokenName = tn;
         adminId = adm;
         curators = cu;
@@ -77,7 +77,7 @@ public class CommentWatcher extends ListenerAdapter {
         godMode = gm;
         tokenRequirementEnabled = tknReq;
         waiter = w;
-        spotifyApi = api;
+        spotifyApi = SpotifyAPI.getInstance();
         botIsReady = false;
     }
 
@@ -114,10 +114,11 @@ public class CommentWatcher extends ListenerAdapter {
             if (isValidSubmission(event, spotifyMatcher, user)) { // If it's a valid submission
                 boolean submissionAdded = false;
 
-                if (isCurator(user) && godMode) {
+                if (Utility.isCurator(curators, user) && godMode) {
                     // Admin/Curator is acting with God Mode ON
                     try {
-                        submissionAdded = spotifyApi.addToPlaylist(messageSent.getContentRaw());
+                        submissionAdded = spotifyApi.addToPlaylist(messageSent.getContentRaw(), user.getId(),
+                                messageSent.getId());
 
                         if (submissionAdded) {
                             event.getChannel()
@@ -145,7 +146,8 @@ public class CommentWatcher extends ListenerAdapter {
                 } else if (hasToken(event, playlistTokenName)) {
                     // User has the token (or token requirement is off)
                     try {
-                        submissionAdded = spotifyApi.addToPlaylist(messageSent.getContentRaw());
+                        submissionAdded = spotifyApi.addToPlaylist(messageSent.getContentRaw(), user.getId(),
+                                messageSent.getId());
 
                         if (submissionAdded) {
                             event.getChannel()
@@ -209,10 +211,10 @@ public class CommentWatcher extends ListenerAdapter {
     /**
      * Determine if the event's message is in the format of a Spotify track link.
      *
-     * @param e event containing message
+     * @param event event containing message
      * @return true if the message is a Spotify track link
      */
-    private boolean isValidSubmission(GuildMessageReceivedEvent e, Matcher match, User user) {
+    private boolean isValidSubmission(GuildMessageReceivedEvent event, Matcher match, User user) {
         match.reset();
 
         if (match.find()) { // spotify album, track or playlist link found
@@ -248,7 +250,8 @@ public class CommentWatcher extends ListenerAdapter {
             }
 
             Utility.sendSecretMessage(user,
-                    "Provided " + uriOrLink + ": " + contentType + "\n\n" +
+                    "Provided " + uriOrLink + " type: " + contentType + "\n" +
+                            "Provided link: " + match.group(0) + "\n\n" +
                             "This is not a track link! Please pick a single track to submit." +
                             " Check the #hidden-gems-help channel for more information.\n\n" +
                             "Note: This message will disappear after 60 seconds.",
@@ -262,18 +265,18 @@ public class CommentWatcher extends ListenerAdapter {
         return false;
     }
 
-    private void flagSubmitted(GuildMessageReceivedEvent e) {
+    private void flagSubmitted(GuildMessageReceivedEvent event) {
         String submittedRoleId = Utility.readFromDatabase("SUBMITTED_ROLE_ID");
-        Member member = e.getMember();
+        Member member = event.getMember();
 
         try {
             if (member != null && submittedRoleId != null) {
                 net.dv8tion.jda.api.entities.Role submitted;
 
-                submitted = e.getGuild().getRoleById(submittedRoleId);
+                submitted = event.getGuild().getRoleById(submittedRoleId);
 
                 if (submitted != null && !member.getRoles().contains(submitted)) {
-                    e.getGuild().addRoleToMember(member, submitted).queue();
+                    event.getGuild().addRoleToMember(member, submitted).queue();
                 }
             } else {
                 throw new NullPointerException("User or Role missing.");
@@ -285,23 +288,19 @@ public class CommentWatcher extends ListenerAdapter {
 
     }
 
-    private boolean isCurator(User user) {
-        return curators.stream().anyMatch(curator -> curator.getId().equals(user.getId()));
-    }
-
     /**
      * Given an event, return the number of messages before message
      * corresponding to the event.
      *
-     * @param e event
+     * @param event event
      * @return number of messages before event's message
      */
-    private int commentCount(GuildMessageReceivedEvent e) {
+    private int commentCount(GuildMessageReceivedEvent event) {
         // grab channel
-        MessageChannel ch = e.getChannel();
+        MessageChannel ch = event.getChannel();
 
         // grab message
-        Message msg = e.getMessage();
+        Message msg = event.getMessage();
 
         // return comment count (limit is 100) accounting for help messages
         return ch.getHistoryBefore(msg.getId(), 100).complete().getRetrievedHistory().size() - HELP_COUNT;
@@ -310,10 +309,10 @@ public class CommentWatcher extends ListenerAdapter {
     /**
      * Check if user has a token.
      *
-     * @param e event caused by user
+     * @param event event caused by user
      * @return whether the user has a token
      */
-    private boolean hasToken(GuildMessageReceivedEvent e, String tokenName) {
+    private boolean hasToken(GuildMessageReceivedEvent event, String tokenName) {
         if (!tokenRequirementEnabled) {
             return true; // Bypasses the token check if the requirement is disabled.
         }
@@ -321,7 +320,7 @@ public class CommentWatcher extends ListenerAdapter {
         boolean tokenFlag = false;
 
         try {
-            Member member = e.getMember();
+            Member member = event.getMember();
 
             if (member != null) {
                 // find role
@@ -334,8 +333,8 @@ public class CommentWatcher extends ListenerAdapter {
 
                 return tokenFlag;
             }
-        } catch (NullPointerException err) {
-            logger.error(err.getMessage());
+        } catch (NullPointerException e) {
+            logger.error(e.getMessage());
         }
 
         return tokenFlag;
@@ -346,13 +345,13 @@ public class CommentWatcher extends ListenerAdapter {
      *
      * Note: This removes the first token the method finds.
      *
-     * @param e event containing user
+     * @param event event containing user
      */
-    private void removeToken(GuildMessageReceivedEvent e, String tokenName) {
+    private void removeToken(GuildMessageReceivedEvent event, String tokenName) {
         // removed flag (although might be useless since i'm no longer looping)
         boolean removed = false;
 
-        Member member = e.getMember();
+        Member member = event.getMember();
 
         if (member != null) {
             Optional<Role> optionalRole = member.getRoles().stream()
@@ -363,7 +362,7 @@ public class CommentWatcher extends ListenerAdapter {
                 Role role = optionalRole.get();
 
                 if (role != null) { // redundant but silences warning
-                    e.getGuild().removeRoleFromMember(member, role).queue();
+                    event.getGuild().removeRoleFromMember(member, role).queue();
 
                     removed = true;
                 }

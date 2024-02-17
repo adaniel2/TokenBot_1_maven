@@ -85,19 +85,21 @@ public class Main {
         builder.addEventListeners(waiter);
 
         // comments
-        CommentWatcher comments = new CommentWatcher(tokenName, adminId, curators, targetChannelId, helpChannelId, 0, false, false, waiter,
-                spotifyApi);
+        CommentWatcher comments = new CommentWatcher(tokenName, adminId, curators, targetChannelId, helpChannelId, 0,
+                false, false, waiter);
 
         // commands
         TBBalanceCommand tbBalanceCommand = new TBBalanceCommand(tokenName, commandsChannelId);
         TBCommandsCommand tbCommandsCommand = new TBCommandsCommand(commandsChannelId);
         TBHelpCommand tbHelpCommand = new TBHelpCommand(helpChannelId, commandsChannelId);
+        TBReviewSubsCommand tbReviewSubsCommand = new TBReviewSubsCommand(curators, targetChannelId, commandsChannelId);
 
         // add event listeners and build
         builder.addEventListeners(comments);
         builder.addEventListeners(tbBalanceCommand);
         builder.addEventListeners(tbCommandsCommand);
         builder.addEventListeners(tbHelpCommand);
+        builder.addEventListeners(tbReviewSubsCommand);
 
         // build bot
         JDA jda = builder.build();
@@ -108,9 +110,14 @@ public class Main {
                 String initialAuthCode = Utility.readFromDatabase("SPOTIFY_AUTH_CODE");
 
                 if (initialAuthCode == null) {
-                    spotifyApi.initiateAuthorization(bonjr); // Send the admin the auth link
-
                     try {
+                        // Send the admin the auth link
+                        String authUrl = spotifyApi.initiateAuthorization();
+
+                        if (authUrl != null) {
+                            Utility.sendSecretMessage(bonjr, authUrl, 60).queue();
+                        }
+
                         if (!latch.await(60, TimeUnit.SECONDS)) {
                             logger.error("Timeout while waiting for Spotify auth code. Please restart bot.");
                         } else {
@@ -128,7 +135,7 @@ public class Main {
                                 logger.info("Bot is ready.");
                             }
                         }
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         logger.error("Error: " + e.getMessage());
                     }
                 } else if (spotifyApi.isAccessExpired()) {
@@ -145,8 +152,7 @@ public class Main {
                 }
 
             });
-        }
-        else {
+        } else {
             logger.error("No admin ID provided. Authentication is not possible!");
         }
 

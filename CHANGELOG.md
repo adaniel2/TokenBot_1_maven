@@ -6,13 +6,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [#####] - Unreleased
+## [1.0.4] - 17/02/2024
 
 ### Added
+- New table in database to track submissions
+- Utility functions to read/write submissions to database
+- Automated process of marking reviewed submissions with a checkmark on discord
+- Automated process of announcing latest review session results
+- New command "reviewSubs" to trigger processing + announcement to users who submitted during current batch
 
 ### Fixed
 
 ### Changed
+- Improved method for duplicate checking
+- Improved messages sent to users
+- Reserving variable 'e' for error catching
+- Taking advantage of singleton and not passing SpotifyAPI in constructors anymore
+- Removed the need for Discord API imports in SpotifyAPI class
+- isCurate() check now also accepts curator list (might switch to just using discord roles in the future)
+- Playlist IDs in SpotifyAPI are now static
+- No longer using custom checkmark for reactions
 
 ### Removed
 
@@ -77,7 +90,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - railway.json removed (will use web UI)
 - Decided to get rid of the submission review process code which was commented out; no longer taking that route
 
-[unreleased]: https://github.com/adaniel2/TokenBot_1_maven/compare/1.0.3...HEAD
+[unreleased]: https://github.com/adaniel2/TokenBot_1_maven/compare/1.0.4...HEAD
+[1.0.4]: https://github.com/adaniel2/TokenBot_1_maven/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/adaniel2/TokenBot_1_maven/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/adaniel2/TokenBot_1_maven/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/adaniel2/TokenBot_1_maven/compare/1.0.0...1.0.1

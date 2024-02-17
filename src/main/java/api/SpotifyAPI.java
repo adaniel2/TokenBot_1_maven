@@ -2,7 +2,11 @@ package api;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,20 +17,19 @@ import org.slf4j.LoggerFactory;
 import exceptions.DuplicateTrackException;
 import exceptions.MissingTokenException;
 import exceptions.TrackNotFoundException;
-import net.dv8tion.jda.api.entities.User;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.SpotifyHttpManager;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import se.michaelthelin.spotify.model_objects.specification.Paging;
-import se.michaelthelin.spotify.model_objects.specification.Playlist;
 import se.michaelthelin.spotify.model_objects.specification.PlaylistTrack;
 import se.michaelthelin.spotify.model_objects.specification.Track;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRefreshRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import se.michaelthelin.spotify.requests.data.playlists.AddItemsToPlaylistRequest;
-import se.michaelthelin.spotify.requests.data.playlists.GetPlaylistRequest;
 import se.michaelthelin.spotify.requests.data.tracks.GetTrackRequest;
+import utils.ReactionInfo;
+import utils.Submission;
 import utils.Utility;
 
 public class SpotifyAPI {
@@ -39,6 +42,8 @@ public class SpotifyAPI {
 
     private static final URI redirectUri = SpotifyHttpManager.makeUri(Utility.readFromDatabase("URI_STRING"));
     private static final Logger logger = LoggerFactory.getLogger(SpotifyAPI.class);
+    private static final String playlistId = Utility.readFromDatabase("PLAYLIST_ID");
+    private static final String approvedPlaylistId = Utility.readFromDatabase("APPROVED_PLAYLIST_ID");
 
     // constructor
     private SpotifyAPI() {
@@ -70,7 +75,7 @@ public class SpotifyAPI {
         return instance;
     }
 
-    public Boolean addToPlaylist(String trackLink) {
+    public Boolean addToPlaylist(String trackLink, String userId, String messageId) {
         if (isAccessExpired()) {
             refreshTokens();
         }
@@ -89,9 +94,8 @@ public class SpotifyAPI {
                 }
 
                 String[] trackUri = new String[] { getTrack(trackId).getUri() };
-                String playlistId = Utility.readFromDatabase("PLAYLIST_ID");
 
-                Optional<Boolean> duplicate = isDuplicate(playlistId, track);
+                Optional<Boolean> duplicate = isDuplicate(playlistId, trackId);
 
                 if (duplicate.isPresent()) {
                     if (!duplicate.get()) {
@@ -101,19 +105,22 @@ public class SpotifyAPI {
                                 .build();
 
                         addItemsToPlaylistRequest.execute();
-
                         logger.info("Track added to playlist.");
+
+                        // Add to submissions table in database
+                        Utility.saveTrackSubmission(trackId, userId, messageId);
 
                         return true;
                     }
-                    
+
                     // duplicate entry
-                    throw new DuplicateTrackException("Duplicate entry found. This track is already in queue for review!");
+                    throw new DuplicateTrackException(
+                            "Duplicate entry found. This track is already in queue for review!");
 
                 } else { // error thrown when checking for duplicate
                     return false;
                 }
-                
+
             } catch (IOException | SpotifyWebApiException | ParseException e) {
                 logger.error("Error: " + e.getMessage());
 
@@ -129,18 +136,19 @@ public class SpotifyAPI {
 
     }
 
-    public void initiateAuthorization(User bonjr) {
-        String authorizeUrl = spotifyApi.authorizationCodeUri()
-                .scope("playlist-modify-public playlist-modify-private playlist-read-private") // scopes
-                .show_dialog(true)
-                .build()
-                .execute()
-                .toString();
+    public String initiateAuthorization() throws Exception {
+        try {
+            String authorizeUrl = spotifyApi.authorizationCodeUri()
+                    .scope("playlist-modify-public playlist-modify-private playlist-read-private") // scopes
+                    .show_dialog(true)
+                    .build()
+                    .execute()
+                    .toString();
 
-        if (authorizeUrl != null) {
-            Utility.sendSecretMessage(bonjr, authorizeUrl, 60).queue();
+            return authorizeUrl;
+        } catch (Exception e) {
+            throw new Exception("Failed to build authorization URL.");
         }
-
     }
 
     public void setupAccessAndRefreshToken() {
@@ -234,6 +242,45 @@ public class SpotifyAPI {
         }
     }
 
+    public List<ReactionInfo> processSubmissions() throws Exception {
+        Set<String> approvedTrackIds = fetchPlaylistTracks(approvedPlaylistId);
+        Set<String> submissionTrackIds = fetchPlaylistTracks(playlistId);
+
+        // Fetch all submissions from the database
+        List<Submission> submissions = Utility.fetchAllSubmissions();
+
+        if (submissions.isEmpty()) {
+            throw new Exception("Database does not contain any submissions.");
+        }
+
+        // Reactions list
+        List<ReactionInfo> reactions = new ArrayList<>();
+
+        for (Submission submission : submissions) {
+            String trackId = submission.getTrackId();
+            String userId = submission.getUserId();
+            String messageId = submission.getMessageId();
+            int submissionId = submission.getSubmissionId();
+
+            if (approvedTrackIds.contains(trackId)) {
+                // Track was approved
+                reactions.add(new ReactionInfo(userId, messageId, "✅"));
+                Utility.deleteSubmission(submissionId);
+            } else if (!submissionTrackIds.contains(trackId)) {
+                // Track was not found in the submissions playlist, implying rejection or removal
+                reactions.add(new ReactionInfo(userId, messageId, "✅"));
+                Utility.deleteSubmission(submissionId);
+            }
+
+            // If a track is still in the submissions playlist, no action is taken as it's pending review
+
+        }
+
+        // clean up
+
+        return reactions;
+    }
+
     private Track getTrack(String id) {
         // sync call for metadata using spotify API
         GetTrackRequest getTrackRequest = spotifyApi.getTrack(id)
@@ -250,29 +297,45 @@ public class SpotifyAPI {
         return null;
     }
 
-    private Optional<Boolean> isDuplicate(String playlistId, Track track) {
-        // sync call for metadata using spotify API
-        GetPlaylistRequest getPlaylistRequest = spotifyApi.getPlaylist(playlistId).build();
+    private Optional<Boolean> isDuplicate(String playlistId, String trackId) {
+        try {
+            Set<String> playlistTrackIds = fetchPlaylistTracks(playlistId);
+
+            return Optional.of(playlistTrackIds.contains(trackId));
+        } catch (Exception e) {
+            logger.error("Error checking for duplicate: " + e.getMessage());
+
+            // Return Optional.empty() to indicate an error condition
+            return Optional.empty();
+        }
+    }
+
+    private Set<String> fetchPlaylistTracks(String playlistId) {
+        Set<String> trackIds = new HashSet<>();
+        int offset = 0;
+        final int limit = 100; // Spotify's max limit per request
+        Paging<PlaylistTrack> paging;
 
         try {
-            Playlist playlist = getPlaylistRequest.execute();
+            do {
+                paging = spotifyApi.getPlaylistsItems(playlistId)
+                        .limit(limit)
+                        .offset(offset)
+                        .build()
+                        .execute();
 
-            Paging<PlaylistTrack> pager = playlist.getTracks();
-
-            PlaylistTrack[] playlistTracks = pager.getItems();
-
-            for (PlaylistTrack playlistTrack : playlistTracks) {
-                if (playlistTrack.getTrack().getId().equals(track.getId())) {
-                    return Optional.of(true);
+                for (PlaylistTrack playlistTrack : paging.getItems()) {
+                    trackIds.add(playlistTrack.getTrack().getId());
                 }
-            }
+
+                offset += limit;
+            } while (offset < paging.getTotal());
+
+            return trackIds; // return set of track ids
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             logger.error("Error: " + e.getMessage());
 
-            return Optional.empty(); // Represents the absence of a result due to an error
+            return trackIds; // empty set if error
         }
-
-        return Optional.of(false);
     }
-
 }

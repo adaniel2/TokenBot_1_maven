@@ -7,6 +7,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -25,6 +27,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Utility {
     private static final Properties properties = new Properties();
     private static final Logger logger = LoggerFactory.getLogger(Utility.class);
+
+    // public functions -------
 
     /**
      * Sends a direct message to the user. Delete after a given amount of time.
@@ -101,6 +105,82 @@ public class Utility {
         return null;
     }
 
+    public static void saveTrackSubmission(String trackId, String userId, String messageId) {
+        String sql = "INSERT INTO submissions (trackid, userid, messageid) VALUES (?, ?, ?)";
+
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, trackId);
+            stmt.setString(2, userId);
+            stmt.setString(3, messageId);
+
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Error saving track submission: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Deletes a submission from the database based on its submission ID.
+     * 
+     * @param submissionId The ID of the submission to delete.
+     */
+    public static void deleteSubmission(int submissionId) {
+        String sql = "DELETE FROM submissions WHERE submissionid = ?";
+
+        try (Connection conn = getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, submissionId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Error deleting submission: " + e.getMessage());
+        }
+    }
+
+    public static List<Submission> fetchAllSubmissions() {
+        List<Submission> submissions = new ArrayList<>();
+
+        String sql = "SELECT trackid, userid, messageid, submissionid FROM submissions";
+
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String trackId = rs.getString("trackid");
+                String userId = rs.getString("userid");
+                String messageId = rs.getString("messageid");
+                int submissionId = rs.getInt("submissionid");
+
+                submissions.add(new Submission(trackId, userId, messageId, submissionId));
+            }
+        } catch (SQLException e) {
+            logger.error("Error fetching all track submissions: " + e.getMessage());
+        }
+
+        return submissions;
+    }
+
+    public static CuratorList readCuratorsFromDatabase() {
+        String json = readFromDatabase("CURATORS");
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            return mapper.readValue(json, CuratorList.class);
+        } catch (JsonProcessingException e) {
+            // Handle the exception
+            return null;
+        }
+    }
+
+    public static boolean isCurator(List<Curator> curators, User user) {
+        return curators.stream().anyMatch(curator -> curator.getId().equals(user.getId()));
+    }
+
+    // private functions -------
     private static Connection getConnection() throws SQLException {
         String dbUrl = toJdbcUrl(System.getenv("DATABASE_URL"));
 
@@ -129,19 +209,6 @@ public class Utility {
                 + password;
 
         return jdbcUrl;
-    }
-
-    public static CuratorList readCuratorsFromDatabase() {
-        String json = readFromDatabase("CURATORS");
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        try {
-            return mapper.readValue(json, CuratorList.class);
-        } catch (JsonProcessingException e) {
-            // Handle the exception
-            return null;
-        }
     }
 
 }

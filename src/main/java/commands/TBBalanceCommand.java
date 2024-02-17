@@ -35,19 +35,19 @@ public class TBBalanceCommand extends ListenerAdapter {
      * Watch guild messages for the "balance" command and reply with user's token
      * balance.
      *
-     * @param e guild message event
+     * @param event guild message event
      */
     @Override
-    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent e) {
+    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
         // grab message
-        String message = e.getMessage().getContentRaw();
+        String message = event.getMessage().getContentRaw();
 
         // if it's the command
-        if (message.equals("]balance") && e.getChannel().getId().equals(commandsChId)) {
+        if (message.equals("]balance") && event.getChannel().getId().equals(commandsChId)) {
             // count number of tokens
             int nTokens = 0;
 
-            Member member = e.getMember();
+            Member member = event.getMember();
 
             if (member != null) {
                 for (int i = 0; i < Objects.requireNonNull(member).getRoles().size(); i++) {
@@ -58,7 +58,7 @@ public class TBBalanceCommand extends ListenerAdapter {
                 }
 
                 // reply
-                e.getChannel().sendMessage("<@" + e.getAuthor().getId() + ">,"
+                event.getChannel().sendMessage("<@" + event.getAuthor().getId() + ">,"
                         + " your token balance is: " + nTokens).queue();
             }
 

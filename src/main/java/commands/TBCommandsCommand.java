@@ -30,14 +30,14 @@ public class TBCommandsCommand extends ListenerAdapter {
     /**
      * Return an embed containing all commands and their functions.
      *
-     * @param e guild message event
+     * @param event guild message event
      */
-    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent e) {
+    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
         // grab message
-        String message = e.getMessage().getContentRaw();
+        String message = event.getMessage().getContentRaw();
 
         // if it's the command, return a list of commands and their functions
-        if (message.equals("]commands") && e.getChannel().getId().equals(commandsChId)) {
+        if (message.equals("]commands") && event.getChannel().getId().equals(commandsChId)) {
             // embed builder
             EmbedBuilder eb = new EmbedBuilder();
 
@@ -57,7 +57,7 @@ public class TBCommandsCommand extends ListenerAdapter {
             }
 
             // reply
-            e.getChannel().sendMessage(eb.build()).queue();
+            event.getChannel().sendMessage(eb.build()).queue();
         }
 
     }
