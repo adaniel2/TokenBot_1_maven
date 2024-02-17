@@ -157,7 +157,7 @@ public class Utility {
                 submissions.add(new Submission(trackId, userId, messageId, submissionId));
             }
         } catch (SQLException e) {
-            logger.error("Error fetching all track submissions: " + e.getMessage());
+            logger.error("Error fetching all submissions: " + e.getMessage());
         }
 
         return submissions;
