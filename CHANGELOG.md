@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed compatibility issues with message, channel, and reaction handling after the JDA upgrade
 - Updated `pom.xml` to resolve deployment failure caused by deprecated dependency version
 - Resolved runtime NoClassDefFoundError for ShutdownEvent by removing incompatible JDA-Utilities dependency
+- Added MESSAGE_CONTENT intent to resolve Discord privileged intent warning for message content access
 
 ### Changed
 - Migrated all event listeners to use MessageReceivedEvent instead of removed GuildMessageReceivedEvent
