@@ -7,10 +7,10 @@ import exceptions.DuplicateTrackException;
 import exceptions.TrackNotFoundException;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import utils.Curator;
 import utils.Utility;
@@ -90,7 +90,7 @@ public class CommentWatcher extends ListenerAdapter {
      * @param event event triggering function call
      */
     @Override
-    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
+    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
         User user = event.getAuthor();
 
         if (!event.getChannel().getId().equals(chId) || user.isBot()) {
@@ -214,7 +214,7 @@ public class CommentWatcher extends ListenerAdapter {
      * @param event event containing message
      * @return true if the message is a Spotify track link
      */
-    private boolean isValidSubmission(GuildMessageReceivedEvent event, Matcher match, User user) {
+    private boolean isValidSubmission(MessageReceivedEvent event, Matcher match, User user) {
         match.reset();
 
         if (match.find()) { // spotify album, track or playlist link found
@@ -265,7 +265,7 @@ public class CommentWatcher extends ListenerAdapter {
         return false;
     }
 
-    private void flagSubmitted(GuildMessageReceivedEvent event) {
+    private void flagSubmitted(MessageReceivedEvent event) {
         String submittedRoleId = Utility.readFromDatabase("SUBMITTED_ROLE_ID");
         Member member = event.getMember();
 
@@ -295,7 +295,7 @@ public class CommentWatcher extends ListenerAdapter {
      * @param event event
      * @return number of messages before event's message
      */
-    private int commentCount(GuildMessageReceivedEvent event) {
+    private int commentCount(MessageReceivedEvent event) {
         // grab channel
         MessageChannel ch = event.getChannel();
 
@@ -312,7 +312,7 @@ public class CommentWatcher extends ListenerAdapter {
      * @param event event caused by user
      * @return whether the user has a token
      */
-    private boolean hasToken(GuildMessageReceivedEvent event, String tokenName) {
+    private boolean hasToken(MessageReceivedEvent event, String tokenName) {
         if (!tokenRequirementEnabled) {
             return true; // Bypasses the token check if the requirement is disabled.
         }
@@ -347,7 +347,7 @@ public class CommentWatcher extends ListenerAdapter {
      *
      * @param event event containing user
      */
-    private void removeToken(GuildMessageReceivedEvent event, String tokenName) {
+    private void removeToken(MessageReceivedEvent event, String tokenName) {
         // removed flag (although might be useless since i'm no longer looping)
         boolean removed = false;
 

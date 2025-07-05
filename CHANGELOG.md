@@ -1,4 +1,3 @@
-
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -6,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [#####] - Unreleased
+## [Unreleased]
 
 ### Added
 
@@ -15,6 +14,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Removed
+
+
+## [1.1.2] - 05/07/2025
+
+### Added
+- Support for JDA 5.6.1 and new event/channel APIs
+
+### Fixed
+- Resolved all build and linter errors caused by deprecated or removed JDA 4.x APIs
+- Fixed compatibility issues with message, channel, and reaction handling after the JDA upgrade
+- Updated `pom.xml` to resolve deployment failure caused by deprecated dependency version
+
+### Changed
+- Migrated all event listeners to use MessageReceivedEvent instead of removed GuildMessageReceivedEvent
+- Updated all channel usages to use GuildMessageChannel and MessageChannel from the new JDA 5.x package paths
+- Updated message sending with embeds to use sendMessageEmbeds(...)
+- Updated addReaction calls to use Emoji.fromUnicode(...) as required by JDA 5.x
+- Upgraded JDA dependency to 5.6.1 to address security and compatibility issues
+
+### Removed
+- All usages and imports of removed or deprecated JDA 4.x classes (e.g., GuildMessageReceivedEvent, TextChannel, old MessageChannel import path)
+- Unused or obsolete code and imports related to old JDA versions
 
 
 ## [1.1.1] - 17/02/2024
@@ -113,6 +134,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - railway.json removed (will use web UI)
 - Decided to get rid of the submission review process code which was commented out; no longer taking that route
+
 
 [unreleased]: https://github.com/adaniel2/TokenBot_1_maven/compare/1.1.1...HEAD
 [1.1.1]: https://github.com/adaniel2/TokenBot_1_maven/compare/1.1.0...1.1.1

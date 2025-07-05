@@ -1,8 +1,8 @@
 package commands;
 
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import utils.Curator;
 import utils.ReactionInfo;
@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import api.SpotifyAPI;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 
 public class TBReviewSubsCommand extends ListenerAdapter {
     // variables & constants
@@ -36,7 +37,7 @@ public class TBReviewSubsCommand extends ListenerAdapter {
     }
 
     @Override
-    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
+    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
         String message = event.getMessage().getContentRaw();
 
         // Check if the message is the command and if it's in the correct channel
@@ -54,11 +55,11 @@ public class TBReviewSubsCommand extends ListenerAdapter {
                 List<ReactionInfo> reactions = spotifyApi.processSubmissions();
 
                 if (reactions.size() > 0) {
-                    TextChannel channel = event.getJDA().getTextChannelById(chId); // submissions channel
+                    GuildMessageChannel channel = event.getJDA().getChannelById(GuildMessageChannel.class, chId); // submissions channel
 
                     for (ReactionInfo reaction : reactions) {
                         channel.retrieveMessageById(reaction.messageId)
-                                .queue(msg -> msg.addReaction(reaction.emoji).queue(),
+                                .queue(msg -> msg.addReaction(Emoji.fromUnicode(reaction.emoji)).queue(),
                                         throwable -> logger
                                                 .error("Could not react to message: " + throwable.getMessage()));
                     }
@@ -83,7 +84,7 @@ public class TBReviewSubsCommand extends ListenerAdapter {
                     logger.error("No actionable submissions found.");
                 }
             } catch (Exception e) {
-                logger.error("Error while processing submissions: " + e.getMessage());
+                logger.error("Error processing submissions: " + e.getMessage());
             }
         }
     }

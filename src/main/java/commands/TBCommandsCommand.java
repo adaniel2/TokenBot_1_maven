@@ -1,7 +1,7 @@
 package commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.awt.*;
@@ -32,7 +32,8 @@ public class TBCommandsCommand extends ListenerAdapter {
      *
      * @param event guild message event
      */
-    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
+    @Override
+    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
         // grab message
         String message = event.getMessage().getContentRaw();
 
@@ -57,7 +58,7 @@ public class TBCommandsCommand extends ListenerAdapter {
             }
 
             // reply
-            event.getChannel().sendMessage(eb.build()).queue();
+            event.getChannel().sendMessageEmbeds(eb.build()).queue();
         }
 
     }

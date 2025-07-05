@@ -1,7 +1,7 @@
 package commands;
 
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.util.Objects;
@@ -38,7 +38,7 @@ public class TBBalanceCommand extends ListenerAdapter {
      * @param event guild message event
      */
     @Override
-    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
+    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
         // grab message
         String message = event.getMessage().getContentRaw();
 
