@@ -20,6 +20,6 @@
 
 ## User
 config.properties
-src/main/resources/temp.json
+temp.json
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode
