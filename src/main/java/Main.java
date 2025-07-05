@@ -1,5 +1,3 @@
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-
 import api.SpotifyAPI;
 import commands.*;
 import events.CommentWatcher;
@@ -80,13 +78,9 @@ public class Main {
 
         String[] tokens = tokenList.toArray(new String[0]);
 
-        // waiter
-        EventWaiter waiter = new EventWaiter();
-        builder.addEventListeners(waiter);
-
         // comments
         CommentWatcher comments = new CommentWatcher(tokenName, adminId, curators, targetChannelId, helpChannelId, 0,
-                false, false, waiter);
+                false, false);
 
         // commands
         TBBalanceCommand tbBalanceCommand = new TBBalanceCommand(tokenName, commandsChannelId);

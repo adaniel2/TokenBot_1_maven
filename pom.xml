@@ -81,14 +81,6 @@
       <version>1.7</version>
     </dependency>
 
-    <!-- JDA-Utilities aggregator POM (EventWaiter, etc.) -->
-    <dependency>
-      <groupId>com.jagrosh</groupId>
-      <artifactId>jda-utilities</artifactId>
-      <version>3.0.2</version>
-      <type>pom</type>
-    </dependency>
-
     <!-- JSR-305 for javax.annotation.Nonnull -->
     <dependency>
       <groupId>com.google.code.findbugs</groupId>

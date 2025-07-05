@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Resolved all build and linter errors caused by deprecated or removed JDA 4.x APIs
 - Fixed compatibility issues with message, channel, and reaction handling after the JDA upgrade
 - Updated `pom.xml` to resolve deployment failure caused by deprecated dependency version
+- Resolved runtime NoClassDefFoundError for ShutdownEvent by removing incompatible JDA-Utilities dependency
 
 ### Changed
 - Migrated all event listeners to use MessageReceivedEvent instead of removed GuildMessageReceivedEvent
@@ -32,8 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated message sending with embeds to use sendMessageEmbeds(...)
 - Updated addReaction calls to use Emoji.fromUnicode(...) as required by JDA 5.x
 - Upgraded JDA dependency to 5.6.1 to address security and compatibility issues
+- Upgraded PostgreSQL JDBC driver to 42.7.3 to resolve critical security vulnerability
 
 ### Removed
+- JDA-Utilities dependency (3.0.2) due to incompatibility with JDA 5.x
+- Unused EventWaiter imports, instantiation, and related code from Main.java and CommentWatcher.java
 - All usages and imports of removed or deprecated JDA 4.x classes (e.g., GuildMessageReceivedEvent, TextChannel, old MessageChannel import path)
 - Unused or obsolete code and imports related to old JDA versions
 

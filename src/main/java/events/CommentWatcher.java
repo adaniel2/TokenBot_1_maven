@@ -1,7 +1,5 @@
 package events;
 
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-
 import api.SpotifyAPI;
 import exceptions.DuplicateTrackException;
 import exceptions.TrackNotFoundException;
@@ -42,7 +40,6 @@ public class CommentWatcher extends ListenerAdapter {
     private final boolean godMode; // allows posting without token (can be enabled for maintenance purposes)
     private final String adminId; // admin
     private final List<Curator> curators; // curators
-    private final EventWaiter waiter; // EventWaiter
     private SpotifyAPI spotifyApi; // api
     private boolean botIsReady; // bot status
     private final boolean tokenRequirementEnabled; // Enables/disables the requirement for a token
@@ -62,12 +59,10 @@ public class CommentWatcher extends ListenerAdapter {
      * @param IC     no. of permanent help/instruction messages in channel
      * @param gm     god mode
      * @param tknReq token requirement
-     * @param w      event waiter
      * @param api    spotify api
      */
     public CommentWatcher(String tn, String adm, List<Curator> cu, String ch, String hlp, int HC, boolean gm,
-            boolean tknReq,
-            EventWaiter w) {
+            boolean tknReq) {
         playlistTokenName = tn;
         adminId = adm;
         curators = cu;
@@ -76,7 +71,6 @@ public class CommentWatcher extends ListenerAdapter {
         HELP_COUNT = HC;
         godMode = gm;
         tokenRequirementEnabled = tknReq;
-        waiter = w;
         spotifyApi = SpotifyAPI.getInstance();
         botIsReady = false;
     }
