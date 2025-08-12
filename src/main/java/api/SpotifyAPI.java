@@ -95,10 +95,21 @@ public class SpotifyAPI {
 
                 String[] trackUri = new String[] { getTrack(trackId).getUri() };
 
-                Optional<Boolean> duplicate = isDuplicate(playlistId, trackId);
+                // Check for duplicates in both submissions and approved playlists
+                Optional<Boolean> duplicateInSubmissions = isDuplicate(playlistId, trackId);
+                Optional<Boolean> duplicateInApproved = isDuplicate(approvedPlaylistId, trackId);
 
-                if (duplicate.isPresent()) {
-                    if (!duplicate.get()) {
+                if (duplicateInSubmissions.isPresent() && duplicateInApproved.isPresent()) {
+                    if (duplicateInApproved.get()) {
+                        // Track is already approved
+                        throw new DuplicateTrackException(
+                                "This track has already been approved and is in the approved playlist!");
+                    } else if (duplicateInSubmissions.get()) {
+                        // Track is already in submissions queue
+                        throw new DuplicateTrackException(
+                                "Duplicate entry found. This track is already in queue for review!");
+                    } else {
+                        // Track is not in either playlist - safe to add
                         AddItemsToPlaylistRequest addItemsToPlaylistRequest = spotifyApi
                                 .addItemsToPlaylist(playlistId, trackUri)
                                 .position(0)
@@ -112,10 +123,6 @@ public class SpotifyAPI {
 
                         return true;
                     }
-
-                    // duplicate entry
-                    throw new DuplicateTrackException(
-                            "Duplicate entry found. This track is already in queue for review!");
 
                 } else { // error thrown when checking for duplicate
                     return false;
@@ -243,11 +250,25 @@ public class SpotifyAPI {
     }
 
     public List<ReactionInfo> processSubmissions() throws Exception {
+        logger.info("=== Starting processSubmissions() ===");
+        
         Set<String> approvedTrackIds = fetchPlaylistTracks(approvedPlaylistId);
         Set<String> submissionTrackIds = fetchPlaylistTracks(playlistId);
 
+        logger.info("Approved playlist ({}) contains {} tracks", approvedPlaylistId, approvedTrackIds.size());
+        logger.info("Submissions playlist ({}) contains {} tracks", playlistId, submissionTrackIds.size());
+        
+        if (!approvedTrackIds.isEmpty()) {
+            logger.info("Approved track IDs: {}", approvedTrackIds);
+        }
+        if (!submissionTrackIds.isEmpty()) {
+            logger.info("Submission track IDs: {}", submissionTrackIds);
+        }
+
         // Fetch all submissions from the database
         List<Submission> submissions = Utility.fetchAllSubmissions();
+
+        logger.info("Database contains {} submissions", submissions.size());
 
         if (submissions.isEmpty()) {
             throw new Exception("Database does not contain any submissions.");
@@ -262,20 +283,28 @@ public class SpotifyAPI {
             String messageId = submission.getMessageId();
             int submissionId = submission.getSubmissionId();
 
+            logger.info("Processing submission {}: trackId={}, userId={}, messageId={}", 
+                       submissionId, trackId, userId, messageId);
+
             if (approvedTrackIds.contains(trackId)) {
                 // Track was approved
+                logger.info("✅ Track {} found in APPROVED playlist - adding checkmark and removing from DB", trackId);
                 reactions.add(new ReactionInfo(userId, messageId, "✅"));
                 Utility.deleteSubmission(submissionId);
             } else if (!submissionTrackIds.contains(trackId)) {
                 // Track was not found in the submissions playlist, implying rejection or removal
+                logger.info("❌ Track {} NOT found in submissions playlist - adding checkmark and removing from DB", trackId);
                 reactions.add(new ReactionInfo(userId, messageId, "✅"));
                 Utility.deleteSubmission(submissionId);
+            } else {
+                logger.info("⏳ Track {} still in submissions playlist - no action taken", trackId);
             }
 
             // If a track is still in the submissions playlist, no action is taken as it's pending review
 
         }
 
+        logger.info("=== processSubmissions() complete: {} reactions to add ===", reactions.size());
         // clean up
 
         return reactions;
@@ -311,6 +340,7 @@ public class SpotifyAPI {
     }
 
     private Set<String> fetchPlaylistTracks(String playlistId) {
+        logger.info("Fetching tracks from playlist: {}", playlistId);
         Set<String> trackIds = new HashSet<>();
         int offset = 0;
         final int limit = 100; // Spotify's max limit per request
@@ -324,16 +354,22 @@ public class SpotifyAPI {
                         .build()
                         .execute();
 
+                logger.info("Fetched {} items from playlist {} (offset: {}, total: {})", 
+                           paging.getItems().length, playlistId, offset, paging.getTotal());
+
                 for (PlaylistTrack playlistTrack : paging.getItems()) {
-                    trackIds.add(playlistTrack.getTrack().getId());
+                    String trackId = playlistTrack.getTrack().getId();
+                    trackIds.add(trackId);
+                    logger.debug("Found track in playlist {}: {}", playlistId, trackId);
                 }
 
                 offset += limit;
             } while (offset < paging.getTotal());
 
+            logger.info("Successfully fetched {} unique tracks from playlist {}", trackIds.size(), playlistId);
             return trackIds; // return set of track ids
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            logger.error("Error: " + e.getMessage());
+            logger.error("Error fetching tracks from playlist {}: {}", playlistId, e.getMessage());
 
             return trackIds; // empty set if error
         }
