@@ -111,7 +111,7 @@ public class Main {
                         String authUrl = spotifyApi.initiateAuthorization();
 
                         if (authUrl != null) {
-                            Utility.sendSecretMessage(bonjr, authUrl, 60).queue();
+                            Utility.sendSecretMessage(bonjr, authUrl, 60);
                         }
 
                         if (!latch.await(60, TimeUnit.SECONDS)) {

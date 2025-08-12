@@ -46,7 +46,7 @@ public class TBReviewSubsCommand extends ListenerAdapter {
             User user = event.getAuthor();
 
             if (!Utility.isCurator(curators, user)) {
-                Utility.sendSecretMessage(user, "You do not have the required permissions to run that command!", 60).queue();
+                Utility.sendSecretMessage(user, "You do not have the required permissions to run that command!", 60);
                 return;
             }
 

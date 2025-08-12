@@ -32,19 +32,25 @@ public class Utility {
 
     /**
      * Sends a direct message to the user. Delete after a given amount of time.
+     * Handles errors gracefully to prevent memory leaks from failed deletions.
      *
      * @param user    the submitting user
      * @param content private message sent by bot to user
      * @param time    time before message deletion
-     *
-     * @return RestAction - Type: PrivateChannel
-     *         Retrieves the PrivateChannel to use to directly message this User.
      */
-    public static RestAction<Void> sendSecretMessage(User user, @Nonnull String content, int time) {
-        return user.openPrivateChannel() // RestAction<PrivateChannel>
+    public static void sendSecretMessage(User user, @Nonnull String content, int time) {
+        user.openPrivateChannel() // RestAction<PrivateChannel>
                 .flatMap(channel -> channel.sendMessage(content)) // RestAction<Message>
-                .delay(time, TimeUnit.SECONDS) // RestAction<Message> with delayed response
-                .flatMap(Message::delete); // RestAction<Void> (executed x seconds after sending)
+                .queue(message -> {
+                    // Schedule deletion with proper error handling to prevent memory leaks
+                    message.delete().queueAfter(time, TimeUnit.SECONDS, null, throwable -> {
+                        // Silently handle deletion failures - prevents memory accumulation
+                        logger.debug("Failed to delete secret message: {}", throwable.getMessage());
+                    });
+                }, throwable -> {
+                    // Handle message send failures to prevent hanging tasks
+                    logger.debug("Failed to send secret message: {}", throwable.getMessage());
+                });
     }
 
     public static void saveToFile(String key, String value) {

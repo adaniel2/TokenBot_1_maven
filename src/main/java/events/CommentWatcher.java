@@ -195,7 +195,7 @@ public class CommentWatcher extends ListenerAdapter {
                     "Hello o/, I saw your submission, but I only accept Spotify links!\n\n" +
                             "Check out the <#" + helpChId + "> channel for more details!\n\n" +
                             "Note: This message will be deleted after 60 seconds.",
-                    60).queue();
+                    60);
 
             logger.warn("Invalid link deleted.");
         }
@@ -249,7 +249,7 @@ public class CommentWatcher extends ListenerAdapter {
                             "This is not a track link! Please pick a single track to submit." +
                             " Check the #hidden-gems-help channel for more information.\n\n" +
                             "Note: This message will disappear after 60 seconds.",
-                    60).queue();
+                    60);
 
             return false;
         }
